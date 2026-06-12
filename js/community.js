@@ -164,3 +164,4 @@ function showScore(correct, total, results, readonly) {
   document.getElementById('score-area').innerHTML = `<div class="score-panel"><div class="score-top"><div class="score-circle ${cls}"><div class="pct">${pct}%</div><div class="frac">${correct}/${total}</div></div><div class="score-msg">${readonly?'Previously completed':msg}<div class="sub">${correct} correct out of ${total}</div></div></div>${rows?`<div class="score-details">${rows}</div>`:''}</div>`;
   document.getElementById('score-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+
