@@ -212,6 +212,7 @@ function switchTTab(name, btn) {
   if (name === 'les') { updateModuleSelect(); updateSubfolderSelect(); }
   if (name === 'routine') renderTeacherRoutineTab();
   if (name === 'students') renderStudentsTab();
+  if (name === 'soundboard') renderSoundboardTab();
 }
 
 /* ══════════════════════════════════════════
@@ -363,3 +364,89 @@ function renderManageList() {
   list.innerHTML = html;
 }
 
+
+/* ══════════════════════════════════════════
+   SOUNDBOARD MANAGER (Teacher)
+══════════════════════════════════════════ */
+function renderSoundboardTab() {
+  const modSel = document.getElementById('sb-module-select'); if (!modSel) return;
+  const prevMod = modSel.value;
+  modSel.innerHTML = '<option value="">— Select a module —</option>' + dbModules.map(m => `<option value="${esc(m.id)}">${esc(m.title)}</option>`).join('');
+  if (prevMod && dbModules.some(m => m.id === prevMod)) modSel.value = prevMod;
+  updateSoundboardSubfolderSelect();
+}
+
+function updateSoundboardSubfolderSelect() {
+  const modId = document.getElementById('sb-module-select').value;
+  const subSel = document.getElementById('sb-submodule-select');
+  const prevSub = subSel.value;
+  const subs = dbSubmodules.filter(s => s.module_id === modId);
+  subSel.innerHTML = '<option value="">— Select a subfolder —</option>' + subs.map(s => `<option value="${esc(s.id)}">${esc(s.title)}</option>`).join('');
+  if (prevSub && subs.some(s => s.id === prevSub)) subSel.value = prevSub;
+  renderSoundboardManager();
+}
+
+function renderSoundboardManager() {
+  const subId = document.getElementById('sb-submodule-select').value;
+  const area = document.getElementById('soundboard-manager-area');
+  if (!subId) { area.style.display = 'none'; return; }
+  area.style.display = 'block';
+  const list = document.getElementById('soundboard-items-list');
+  const items = dbSoundboard.filter(s => s.submodule_id === subId);
+  list.innerHTML = items.length ? items.map(item => `
+    <div class="sb-manage-row" id="sb-row-${item.id}">
+      <input type="text" value="${esc(item.text)}" placeholder="word / phrase" onchange="updateSoundboardField('${item.id}','text',this.value)"/>
+      <input type="text" class="sb-ipa-input" value="${esc(item.ipa||'')}" placeholder="/ipa/" onchange="updateSoundboardField('${item.id}','ipa',this.value)"/>
+      ${item.audio_url ? `<audio controls src="${esc(item.audio_url)}"></audio>` : `<span class="sb-audio-label">No audio yet</span>`}
+      <input type="file" accept="audio/*" style="font-size:11px;max-width:130px" onchange="uploadSoundboardAudio(event,'${item.id}')"/>
+      <button class="q-card-delete" onclick="deleteSoundboardItem('${item.id}')">×</button>
+    </div>`).join('') : `<div style="color:var(--text-light);font-size:13px;padding:.5rem 0">No items yet. Paste rows above to get started.</div>`;
+}
+
+async function bulkAddSoundboardItems() {
+  const subId = document.getElementById('sb-submodule-select').value; if (!subId) return;
+  const raw = document.getElementById('sb-bulk-paste').value;
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+  if (!lines.length) return;
+  const maxOrder = dbSoundboard.filter(s => s.submodule_id === subId).reduce((max, s) => Math.max(max, s.order_index || 0), -1);
+  const rows = lines.map((line, idx) => {
+    const cols = line.split('\t');
+    return { submodule_id: subId, text: (cols[0]||'').trim(), ipa: (cols[1]||'').trim(), order_index: maxOrder + 1 + idx };
+  }).filter(r => r.text);
+  if (!rows.length) return;
+  const { data, error } = await sb.from('soundboard_items').insert(rows).select();
+  if (error) { alert('Error adding items: ' + error.message); return; }
+  dbSoundboard.push(...(data || []));
+  document.getElementById('sb-bulk-paste').value = '';
+  renderSoundboardManager();
+}
+
+function updateSoundboardField(itemId, field, value) {
+  const item = dbSoundboard.find(s => s.id === itemId); if (!item) return;
+  item[field] = value;
+  clearTimeout(item._saveTimer);
+  item._saveTimer = setTimeout(async () => {
+    const { error } = await sb.from('soundboard_items').update({ [field]: value }).eq('id', itemId);
+    if (error) alert('Error saving: ' + error.message);
+  }, 500);
+}
+
+async function uploadSoundboardAudio(event, itemId) {
+  const file = event.target.files[0]; if (!file) return;
+  const fn = `sb_${itemId}_${Date.now()}.${file.name.split('.').pop()}`;
+  const { error: upErr } = await sb.storage.from('audios').upload(fn, file);
+  if (upErr) { alert('Upload error: ' + upErr.message); return; }
+  const url = sb.storage.from('audios').getPublicUrl(fn).data.publicUrl;
+  const { error } = await sb.from('soundboard_items').update({ audio_url: url }).eq('id', itemId);
+  if (error) { alert('Error saving: ' + error.message); return; }
+  const item = dbSoundboard.find(s => s.id === itemId); if (item) item.audio_url = url;
+  renderSoundboardManager();
+}
+
+async function deleteSoundboardItem(itemId) {
+  if (!confirm('Delete this item?')) return;
+  const { error } = await sb.from('soundboard_items').delete().eq('id', itemId);
+  if (error) { alert('Error: ' + error.message); return; }
+  dbSoundboard = dbSoundboard.filter(s => s.id !== itemId);
+  renderSoundboardManager();
+}
