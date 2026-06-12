@@ -201,6 +201,57 @@ nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.
 .c-progress-box{background:var(--surface);border:1px solid var(--skool-border);border-radius:var(--radius-sm);padding:1rem 1.1rem;margin-bottom:1rem}
 .c-course-title{font-size:15px;font-weight:800;color:var(--text)}
 .c-nav-list{display:flex;flex-direction:column;gap:4px}
+/* ══════════════════════════════════════════
+   CLASSROOM REDESIGN — module cards, accordion, fluid transitions
+══════════════════════════════════════════ */
+.course-card{position:relative;border-top:4px solid var(--accent,var(--brand))}
+.course-card-icon{width:42px;height:42px;border-radius:12px;background:var(--accent,var(--brand));color:#fff;display:flex;align-items:center;justify-content:center;font-size:21px;margin-bottom:14px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.course-card-progress-wrap{display:flex;align-items:center;gap:8px}
+.course-card-progress-bar{flex:1;background:var(--skool-border);border-radius:10px;height:6px;overflow:hidden}
+.course-card-progress-fill{background:var(--accent,var(--green));width:0%;height:100%;border-radius:10px;transition:width .4s ease}
+.course-card-pct{font-size:11px;font-weight:800;color:var(--text-muted);min-width:32px;text-align:right}
+.course-card-arrow{position:absolute;top:1.5rem;right:1.5rem;color:var(--text-light);font-size:16px;opacity:0;transform:translateX(-4px);transition:opacity .2s,transform .2s}
+.course-card:hover .course-card-arrow{opacity:1;transform:translateX(0)}
+
+/* Soundboard */
+.soundboard-panel{margin-top:1.75rem;background:var(--surface);border:1px solid var(--skool-border);border-radius:var(--radius);padding:1.25rem}
+.soundboard-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-light);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.soundboard-row{display:flex;align-items:center;gap:12px;padding:9px 4px;border-bottom:1px solid var(--bg)}
+.soundboard-row:last-child{border-bottom:none}
+.soundboard-play{flex-shrink:0;width:34px;height:34px;border-radius:50%;border:none;background:var(--brand);color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,transform .15s}
+.soundboard-play:hover{background:var(--brand-dark);transform:scale(1.06)}
+.soundboard-play.playing{background:var(--green,#1D9E75)}
+.soundboard-word{font-size:14px;font-weight:700;color:var(--text);flex:1}
+.soundboard-ipa{font-size:12px;color:var(--text-muted);font-family:monospace}
+.sb-manage-row{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:var(--radius-sm);padding:8px 10px;margin-bottom:6px;flex-wrap:wrap}
+.sb-manage-row input[type="text"]{margin:0;flex:1;min-width:100px;font-size:13px;padding:6px 10px}
+.sb-manage-row .sb-ipa-input{flex:0 0 110px;font-family:monospace}
+.sb-manage-row audio{height:30px;max-width:140px}
+.sb-audio-label{font-size:11px;color:var(--brand-mid);font-weight:700;white-space:nowrap}
+
+/* Sidebar accordion */
+.c-sidebar{position:sticky;top:1rem}
+@media(max-width:768px){.c-sidebar{position:static}}
+.c-subfolder-group{margin-bottom:6px;border-radius:var(--radius-sm);overflow:hidden}
+.c-subfolder-header{display:flex;align-items:center;gap:8px;padding:9px 10px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);cursor:pointer;border-radius:var(--radius-sm);transition:background .15s;user-select:none}
+.c-subfolder-header:hover{background:var(--bg)}
+.c-subfolder-title{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c-chevron{display:inline-block;font-size:11px;color:var(--text-light);transition:transform .25s ease;flex-shrink:0}
+.c-chevron.open{transform:rotate(90deg)}
+.c-subfolder-body{overflow:hidden;max-height:0;opacity:0;transition:max-height .35s ease,opacity .3s ease;padding-left:4px}
+.c-subfolder-body.open{max-height:2000px;opacity:1}
+
+/* Breadcrumb above lesson content */
+.lesson-breadcrumb{display:none;align-items:center;gap:6px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--brand);margin-bottom:10px}
+
+/* Fluid fade-in transition when switching lessons */
+.c-main.fade-in{animation:cmFadeIn .35s ease}
+@keyframes cmFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Question/Task step badges */
+.ex-question-block{position:relative;background:var(--bg);border-radius:var(--radius);padding:1.25rem 1.25rem 1.25rem 1.5rem;margin-bottom:1rem;border-left:4px solid var(--brand-light);box-shadow:0 2px 10px rgba(0,0,0,.03);transition:box-shadow .2s}
+.ex-question-block:hover{box-shadow:0 4px 16px rgba(0,0,0,.06)}
+.ex-q-num{display:inline-flex;align-items:center;gap:6px;background:var(--brand);color:#fff;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:10px;box-shadow:0 2px 6px rgba(45,42,232,.25)}
 .c-subfolder-group{margin-bottom:12px}
 .c-subfolder-header{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:4px}
 .c-subfolder-prog{background:var(--skool-border);padding:2px 6px;border-radius:10px;color:var(--text);font-size:10px}
@@ -396,8 +447,6 @@ footer strong{color:var(--brand)}
 .student-prog-stats{font-size:12px;color:var(--text-muted)}
 
 /* EXERCISE PLAYER & MIXED TYPES */
-.ex-question-block{background:var(--bg);border:1px solid var(--skool-border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem}
-.ex-q-num{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:6px}
 .ex-q-text{font-size:15px;font-weight:600;color:var(--text);margin-bottom:1rem;line-height:1.5}
 .options-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media(max-width:440px){.options-grid{grid-template-columns:1fr}}
