@@ -352,6 +352,7 @@
         <div class="c-nav-list" id="sidebar-render"></div>
       </aside>
       <main class="c-main">
+        <div id="lesson-breadcrumb" class="lesson-breadcrumb"></div>
         <div id="view-welcome" class="c-empty-state"><div style="font-size:40px;margin-bottom:12px">👋</div><h2 style="color:var(--text);font-weight:800;margin-bottom:8px;font-size:18px">Welcome!</h2><p>Select a lesson from the menu on the left to get started.</p></div>
         <div id="view-video" style="display:none">
           <h2 id="cv-video-title" class="lesson-title-main"></h2><div id="cv-video-audios" class="lesson-audios-box" style="display:none"></div><div id="cv-video-player" class="video-container"></div><div id="cv-video-text" class="text-content-main ql-editor" style="border:none;padding:0;margin-top:1.5rem"></div><div id="cv-video-resources" class="resources-panel" style="display:none"></div><div class="lesson-complete-wrap"><button class="submit-btn" id="btn-complete-video" onclick="markCurrentLessonComplete()">Mark as complete</button></div>
@@ -371,6 +372,12 @@
           <div class="player-footer"><button class="submit-btn" id="submit-btn" onclick="submitExercise()">Check my answers</button><button class="retry-btn" id="retry-btn" style="display:none" onclick="retryExercise()">Try again</button></div>
           <div id="score-area"></div>
           <div id="cv-task-resources" class="resources-panel" style="display:none"></div>
+        </div>
+
+        <!-- Soundboard — shows words/phrases relevant to this lesson's subfolder -->
+        <div id="soundboard-panel" class="soundboard-panel" style="display:none">
+          <div class="soundboard-title">🔊 Soundboard — practice these sounds</div>
+          <div id="soundboard-list"></div>
         </div>
 
         <!-- Recording panel — shared across all lesson types -->
@@ -460,6 +467,7 @@
           <button class="t-tab-btn" onclick="switchTTab('les',this)">📝 Lesson</button>
           <button class="t-tab-btn" onclick="switchTTab('routine',this)">📅 Routines</button>
           <button class="t-tab-btn" onclick="switchTTab('students',this)">👥 Students <span id="pending-badge" style="display:none;background:#e05252;color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:800;margin-left:4px"></span></button>
+          <button class="t-tab-btn" onclick="switchTTab('soundboard',this)">🔊 Soundboard</button>
         </div>
         <div class="t-tab-panel active" id="t-tab-mod">
           <h3 id="panel-title-mod" style="border:none;padding-bottom:0;margin-bottom:.9rem">📂 Create Module</h3>
@@ -533,6 +541,22 @@
           <div id="students-pending-list"><div style="color:var(--text-light);font-size:13px;padding:.5rem 0">Loading...</div></div>
           <div class="field-label" style="margin-top:1.5rem">Approved students</div>
           <div id="students-approved-list"></div>
+        </div>
+        <div class="t-tab-panel" id="t-tab-soundboard">
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <div style="flex:1;min-width:160px"><span class="field-label" style="margin-top:0">Module</span><select id="sb-module-select" onchange="updateSoundboardSubfolderSelect()" style="margin-bottom:0"></select></div>
+            <div style="flex:1;min-width:160px"><span class="field-label" style="margin-top:0">Subfolder</span><select id="sb-submodule-select" onchange="renderSoundboardManager()" style="margin-bottom:0"></select></div>
+          </div>
+
+          <div id="soundboard-manager-area" style="display:none;margin-top:1.25rem">
+            <div class="field-label" style="margin-top:0">Bulk-add from Google Sheets</div>
+            <p style="font-size:12px;color:var(--text-muted);margin:-4px 0 8px">Select a range in your Sheet (word + optional IPA columns), copy it (Ctrl+C), and paste it below. Each row becomes a new item.</p>
+            <textarea id="sb-bulk-paste" placeholder="bit	/bɪt/&#10;sit	/sɪt/&#10;hit	/hɪt/" style="min-height:90px;font-family:monospace;font-size:13px"></textarea>
+            <button class="secondary-btn" onclick="bulkAddSoundboardItems()" style="margin-top:8px">+ Add pasted rows</button>
+
+            <div class="field-label" style="margin-top:1.5rem">Items in this subfolder</div>
+            <div id="soundboard-items-list"></div>
+          </div>
         </div>
       </div>
     </div>
