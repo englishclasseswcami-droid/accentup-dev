@@ -395,12 +395,29 @@ function renderSoundboardManager() {
   const items = dbSoundboard.filter(s => s.submodule_id === subId);
   list.innerHTML = items.length ? items.map(item => `
     <div class="sb-manage-row" id="sb-row-${item.id}">
-      <input type="text" value="${esc(item.text)}" placeholder="word / phrase" onchange="updateSoundboardField('${item.id}','text',this.value)"/>
-      <input type="text" class="sb-ipa-input" value="${esc(item.ipa||'')}" placeholder="/ipa/" onchange="updateSoundboardField('${item.id}','ipa',this.value)"/>
+      <input type="text" id="sb-text-${item.id}" value="${esc(item.text)}" placeholder="word / phrase" oninput="markSoundboardDirty('${item.id}')"/>
+      <input type="text" id="sb-ipa-${item.id}" class="sb-ipa-input" value="${esc(item.ipa||'')}" placeholder="/ipa/" oninput="markSoundboardDirty('${item.id}')"/>
       ${item.audio_url ? `<audio controls src="${esc(item.audio_url)}"></audio>` : `<span class="sb-audio-label">No audio yet</span>`}
       <input type="file" accept="audio/*" style="font-size:11px;max-width:130px" onchange="uploadSoundboardAudio(event,'${item.id}')"/>
+      <button class="primary-btn" id="sb-save-${item.id}" onclick="saveSoundboardItem('${item.id}')" style="margin:0;padding:7px 14px;font-size:12px;width:auto;opacity:.4" disabled>💾 Save</button>
       <button class="q-card-delete" onclick="deleteSoundboardItem('${item.id}')">×</button>
     </div>`).join('') : `<div style="color:var(--text-light);font-size:13px;padding:.5rem 0">No items yet. Paste rows above to get started.</div>`;
+}
+
+function markSoundboardDirty(itemId) {
+  const btn = document.getElementById('sb-save-' + itemId);
+  if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.textContent = '💾 Save'; }
+}
+
+async function saveSoundboardItem(itemId) {
+  const text = document.getElementById('sb-text-' + itemId).value.trim();
+  const ipa = document.getElementById('sb-ipa-' + itemId).value.trim();
+  const btn = document.getElementById('sb-save-' + itemId);
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Saving...'; }
+  const { error } = await sb.from('soundboard_items').update({ text, ipa }).eq('id', itemId);
+  if (error) { alert('Error saving: ' + error.message); if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.textContent = '💾 Save'; } return; }
+  const item = dbSoundboard.find(s => s.id === itemId); if (item) { item.text = text; item.ipa = ipa; }
+  if (btn) { btn.textContent = '✅ Saved!'; btn.style.opacity = '.4'; setTimeout(() => { if (btn) btn.textContent = '💾 Save'; }, 1800); }
 }
 
 async function bulkAddSoundboardItems() {
@@ -419,16 +436,6 @@ async function bulkAddSoundboardItems() {
   dbSoundboard.push(...(data || []));
   document.getElementById('sb-bulk-paste').value = '';
   renderSoundboardManager();
-}
-
-function updateSoundboardField(itemId, field, value) {
-  const item = dbSoundboard.find(s => s.id === itemId); if (!item) return;
-  item[field] = value;
-  clearTimeout(item._saveTimer);
-  item._saveTimer = setTimeout(async () => {
-    const { error } = await sb.from('soundboard_items').update({ [field]: value }).eq('id', itemId);
-    if (error) alert('Error saving: ' + error.message);
-  }, 500);
 }
 
 async function uploadSoundboardAudio(event, itemId) {
