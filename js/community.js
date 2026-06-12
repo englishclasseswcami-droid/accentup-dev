@@ -62,7 +62,7 @@ async function openPost(postId) {
   const { data: p } = await sb.from('posts').select('*').eq('id', postId).single();
   if (!p) { backToCommunityFeed(); return; }
   const canEdit = currentUser?.id === p.user_id;
-  const bodyText = p.body || p.content || '';
+  const bodyText = sanitizeHtml(p.body || p.content || '');
   document.getElementById('single-post-render').innerHTML = `
     <div class="post-header">
       <div class="post-avatar">${renderAvatarHTML(p.user_id, '')}</div>
@@ -164,4 +164,3 @@ function showScore(correct, total, results, readonly) {
   document.getElementById('score-area').innerHTML = `<div class="score-panel"><div class="score-top"><div class="score-circle ${cls}"><div class="pct">${pct}%</div><div class="frac">${correct}/${total}</div></div><div class="score-msg">${readonly?'Previously completed':msg}<div class="sub">${correct} correct out of ${total}</div></div></div>${rows?`<div class="score-details">${rows}</div>`:''}</div>`;
   document.getElementById('score-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
-
