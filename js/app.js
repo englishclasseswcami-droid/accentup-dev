@@ -154,11 +154,12 @@ async function fetchData() {
     const userEmail = currentUser?.email?.toLowerCase() || '';
     const isTeacher = userEmail === TEACHER_EMAIL.toLowerCase();
 
-    const [rMod, rSub, rLes, rProg] = await Promise.all([
+    const [rMod, rSub, rLes, rProg, rSound] = await Promise.all([
       sb.from('modules').select('*').order('order_index'),
       sb.from('submodules').select('*').order('order_index'),
       sb.from('lessons').select('*').order('order_index'),
-      sb.from('student_progress').select('*').eq('user_id', currentUser.id)
+      sb.from('student_progress').select('*').eq('user_id', currentUser.id),
+      sb.from('soundboard_items').select('*').order('order_index')
     ]);
 
     dbModules = (rMod?.data || []).filter(m => isTeacher || !m.is_private ||
@@ -166,6 +167,7 @@ async function fetchData() {
     dbSubmodules = rSub?.data || [];
     dbLessons = rLes?.data || [];
     dbProgress = rProg?.data || [];
+    dbSoundboard = rSound?.data || [];
 
     renderClassroomGrid(); updateModuleSelect(); if (isTeacher) renderManageList();
 
