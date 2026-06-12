@@ -1,31 +1,78 @@
+const MODULE_COLORS = ['#2D2AE8','#E8602D','#1D9E75','#E83D7A','#7A4FE8','#0EA5C4','#D9A012','#5B6CF0'];
+const MODULE_ICONS  = ['🎯','🔥','🎤','📚','🗣️','✨','🎧','📝'];
+
 function renderClassroomGrid() {
   const grid = document.getElementById('classroom-modules-grid'); if (!grid) return;
   if (!currentUser) { grid.innerHTML = '<div style="color:var(--text-light);font-size:14px;grid-column:1/-1;text-align:center;padding:3rem 0">Log in to access the classroom.</div>'; return; }
   const profile = dbProfiles.find(p => p.id === currentUser.id);
   if (profile && profile.approved === false) { grid.innerHTML = '<div style="color:var(--text-light);font-size:14px;grid-column:1/-1;text-align:center;padding:3rem 1rem">⏳ Your account is pending approval. Camila will activate your access shortly.</div>'; return; }
   if (!dbModules.length) { grid.innerHTML = '<div style="color:var(--text-light);font-size:14px;grid-column:1/-1;text-align:center;padding:3rem 0">No content yet!</div>'; return; }
-  grid.innerHTML = dbModules.map(m => {
+  grid.innerHTML = dbModules.map((m, i) => {
+    const color = MODULE_COLORS[i % MODULE_COLORS.length]; const icon = MODULE_ICONS[i % MODULE_ICONS.length];
     const modLessons = dbLessons.filter(l => l.module_id === m.id); const total = modLessons.length; const done = modLessons.filter(l => dbProgress.some(p => p.lesson_id === l.id)).length; const pct = total === 0 ? 0 : Math.round(done / total * 100);
-    return `<div class="course-card" onclick="openModule('${m.id}')">${m.is_private ? `<span class="private-badge">Private</span>` : ''}<div class="course-card-title">${esc(m.title)}</div><div class="course-card-desc">${total} lesson${total !== 1 ? 's' : ''}</div><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;background:var(--skool-border);border-radius:10px;height:6px;overflow:hidden"><div style="background:var(--green);width:${pct}%;height:100%;border-radius:10px;transition:width .3s"></div></div><span style="font-size:11px;font-weight:700;color:var(--text-muted)">${pct}%</span></div></div>`;
+    return `<div class="course-card" onclick="openModule('${m.id}')" style="--accent:${color}">${m.is_private ? `<span class="private-badge">Private</span>` : ''}<div class="course-card-icon">${icon}</div><div class="course-card-title">${esc(m.title)}</div><div class="course-card-desc">${done} of ${total} lesson${total !== 1 ? 's' : ''} completed</div><div class="course-card-progress-wrap"><div class="course-card-progress-bar"><div class="course-card-progress-fill" style="width:${pct}%"></div></div><span class="course-card-pct">${pct}%</span></div><div class="course-card-arrow">→</div></div>`;
   }).join('');
 }
-function openModule(moduleId) { activeModuleId = moduleId; document.getElementById('classroom-grid-view').style.display = 'none'; document.getElementById('classroom-player-view').style.display = 'block'; document.getElementById('sidebar-mod-title').textContent = dbModules.find(m => m.id === moduleId)?.title || ''; renderSidebar(moduleId); hideAllViews(); document.getElementById('view-welcome').style.display = 'block'; }
+function openModule(moduleId) {
+  activeModuleId = moduleId; document.getElementById('classroom-grid-view').style.display = 'none'; document.getElementById('classroom-player-view').style.display = 'block'; document.getElementById('sidebar-mod-title').textContent = dbModules.find(m => m.id === moduleId)?.title || '';
+  // Default-open: first submodule with an incomplete lesson, else the first submodule
+  const subs = dbSubmodules.filter(s => s.module_id === moduleId);
+  sidebarOpenSubs = new Set();
+  let target = subs.find(sub => dbLessons.some(l => l.module_id === moduleId && l.submodule_id === sub.id && !dbProgress.some(p => p.lesson_id === l.id)));
+  if (!target) target = subs[0];
+  if (target) sidebarOpenSubs.add(target.id);
+  renderSidebar(moduleId); hideAllViews(); document.getElementById('view-welcome').style.display = 'block';
+}
 function backToClassroomGrid() { document.getElementById('classroom-grid-view').style.display = 'block'; document.getElementById('classroom-player-view').style.display = 'none'; hideAllViews(); activeModuleId = null; }
 function renderSidebar(moduleId) {
   const sidebar = document.getElementById('sidebar-render'); const subs = dbSubmodules.filter(s => s.module_id === moduleId); const iconMap = { video:'📺', text:'📄', task:'📝', embed:'🌐' }; let html = '';
   subs.forEach(sub => {
     const subLessons = dbLessons.filter(l => l.module_id === moduleId && l.submodule_id === sub.id); if (!subLessons.length) return;
     const doneCount = subLessons.filter(l => dbProgress.some(p => p.lesson_id === l.id)).length; const pct = Math.round(doneCount / subLessons.length * 100);
-    html += `<div class="c-subfolder-group"><div class="c-subfolder-header"><span>${esc(sub.title)}</span><span class="c-subfolder-prog ${pct===100?'done':''}">${pct}%</span></div>`;
+    const isOpen = sidebarOpenSubs.has(sub.id);
+    html += `<div class="c-subfolder-group"><div class="c-subfolder-header" onclick="toggleSidebarFolder('${sub.id}')"><span class="c-chevron ${isOpen?'open':''}">▸</span><span class="c-subfolder-title">${esc(sub.title)}</span><span class="c-subfolder-prog ${pct===100?'done':''}">${pct}%</span></div><div class="c-subfolder-body ${isOpen?'open':''}">`;
     subLessons.forEach(l => { const isDone = dbProgress.some(p => p.lesson_id === l.id); html += `<div class="c-item" id="item-${l.id}" onclick="showLesson('${l.id}')"><div style="display:flex;align-items:center;gap:8px;overflow:hidden"><span>${iconMap[l.type]||'📄'}</span><span class="c-item-title">${esc(l.title)}</span></div>${isDone?'<span>✅</span>':'<span style="font-size:10px">⚪</span>'}</div>`; });
-    html += '</div>';
+    html += '</div></div>';
   });
   const orphans = dbLessons.filter(l => l.module_id === moduleId && !l.submodule_id);
-  if (orphans.length) { html += '<div class="c-subfolder-group">'; orphans.forEach(l => { const isDone = dbProgress.some(p => p.lesson_id === l.id); html += `<div class="c-item" id="item-${l.id}" onclick="showLesson('${l.id}')"><div style="display:flex;align-items:center;gap:8px;overflow:hidden"><span>${iconMap[l.type]||'📄'}</span><span class="c-item-title">${esc(l.title)}</span></div>${isDone?'<span>✅</span>':'<span style="font-size:10px">⚪</span>'}</div>`; }); html += '</div>'; }
+  if (orphans.length) { html += '<div class="c-subfolder-group"><div class="c-subfolder-body open">'; orphans.forEach(l => { const isDone = dbProgress.some(p => p.lesson_id === l.id); html += `<div class="c-item" id="item-${l.id}" onclick="showLesson('${l.id}')"><div style="display:flex;align-items:center;gap:8px;overflow:hidden"><span>${iconMap[l.type]||'📄'}</span><span class="c-item-title">${esc(l.title)}</span></div>${isDone?'<span>✅</span>':'<span style="font-size:10px">⚪</span>'}</div>`; }); html += '</div></div>'; }
   sidebar.innerHTML = html || '<div style="font-size:12px;color:var(--text-light);text-align:center;margin-top:1rem">Empty folder</div>';
+  if (currentLesson) setActiveSidebarItem('item-' + currentLesson.id);
+}
+function toggleSidebarFolder(subId) {
+  if (sidebarOpenSubs.has(subId)) sidebarOpenSubs.delete(subId); else sidebarOpenSubs.add(subId);
+  if (activeModuleId) renderSidebar(activeModuleId);
 }
 function setActiveSidebarItem(id) { document.querySelectorAll('.c-item').forEach(el => el.classList.remove('active')); document.getElementById(id)?.classList.add('active'); }
-function hideAllViews() { ['view-welcome','view-video','view-text','view-exercise','view-embed'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; }); const vp = document.getElementById('cv-video-player'); if (vp) vp.innerHTML = ''; const rp = document.getElementById('recording-panel'); if (rp) rp.style.display = 'none'; }
+function hideAllViews() { ['view-welcome','view-video','view-text','view-exercise','view-embed'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; }); const vp = document.getElementById('cv-video-player'); if (vp) vp.innerHTML = ''; const rp = document.getElementById('recording-panel'); if (rp) rp.style.display = 'none'; const bc = document.getElementById('lesson-breadcrumb'); if (bc) bc.style.display = 'none'; const sp = document.getElementById('soundboard-panel'); if (sp) sp.style.display = 'none'; stopSoundboardAudio(); }
+/* ══════════════════════════════════════════
+   SOUNDBOARD — embedded per-subfolder word/phrase practice
+══════════════════════════════════════════ */
+let soundboardAudioEl = null;
+
+function renderSoundboard(submoduleId) {
+  const panel = document.getElementById('soundboard-panel'); const list = document.getElementById('soundboard-list');
+  if (!panel || !list) return;
+  const items = dbSoundboard.filter(s => s.submodule_id === submoduleId);
+  if (!items.length) { panel.style.display = 'none'; list.innerHTML = ''; return; }
+  panel.style.display = 'block';
+  list.innerHTML = items.map(item => `<div class="soundboard-row"><button class="soundboard-play" id="sb-play-${item.id}" onclick="playSoundboardAudio('${item.id}')" ${!item.audio_url ? 'disabled style="opacity:.35;cursor:default"' : ''}>▶</button><span class="soundboard-word">${esc(item.text)}</span>${item.ipa ? `<span class="soundboard-ipa">${esc(item.ipa)}</span>` : ''}</div>`).join('');
+}
+
+function playSoundboardAudio(itemId) {
+  const item = dbSoundboard.find(s => s.id === itemId); if (!item || !item.audio_url) return;
+  if (soundboardAudioEl && soundboardAudioEl._itemId === itemId && !soundboardAudioEl.paused) { stopSoundboardAudio(); return; }
+  stopSoundboardAudio();
+  soundboardAudioEl = new Audio(item.audio_url); soundboardAudioEl._itemId = itemId;
+  const btn = document.getElementById('sb-play-' + itemId); if (btn) btn.classList.add('playing');
+  soundboardAudioEl.play().catch(()=>{});
+  soundboardAudioEl.onended = () => { if (btn) btn.classList.remove('playing'); soundboardAudioEl = null; };
+}
+
+function stopSoundboardAudio() {
+  if (soundboardAudioEl) { soundboardAudioEl.pause(); const prevBtn = document.getElementById('sb-play-' + soundboardAudioEl._itemId); if (prevBtn) prevBtn.classList.remove('playing'); soundboardAudioEl = null; }
+}
+
 function renderAudios(panelId, list) { const el = document.getElementById(panelId); if (!el) return; const arr = safeParseJSON(list); if (!arr.length) { el.style.display = 'none'; return; } el.style.display = 'block'; el.innerHTML = arr.map(a => `<div class="lesson-audio-row"><span class="lesson-audio-label">🔊 ${esc(a.label)}</span><audio controls src="${esc(a.url)}"></audio></div>`).join(''); }
 function renderResources(panelId, list) { const el = document.getElementById(panelId); if (!el) return; const arr = safeParseJSON(list); if (!arr.length) { el.style.display = 'none'; return; } el.style.display = 'block'; el.innerHTML = `<div class="resources-heading">Resources</div><div class="resources-list">${arr.map(r => `<a href="${esc(r.url)}" target="_blank" class="resource-link">📎 ${esc(r.name)}</a>`).join('')}</div>`; }
 function updateCompleteButton(btnId, isDone) { const btn = document.getElementById(btnId); if (!btn) return; btn.textContent = isDone ? 'Completed ✅' : 'Mark as complete'; btn.style.background = isDone ? 'var(--green)' : 'var(--brand)'; btn.disabled = isDone; }
@@ -62,8 +109,21 @@ function dismissToast() {
 }
 
 function showLesson(lessonId) {
-  hideAllViews(); setActiveSidebarItem('item-' + lessonId); currentLesson = dbLessons.find(l => l.id === lessonId); if (!currentLesson) return;
+  hideAllViews(); currentLesson = dbLessons.find(l => l.id === lessonId); if (!currentLesson) return;
   const audios = safeParseJSON(currentLesson.content); const resources = safeParseJSON(currentLesson.resources); const isDone = dbProgress.some(p => p.lesson_id === lessonId);
+
+  // Ensure this lesson's subfolder is expanded, then highlight it
+  if (currentLesson.submodule_id && !sidebarOpenSubs.has(currentLesson.submodule_id)) { sidebarOpenSubs.add(currentLesson.submodule_id); if (activeModuleId) renderSidebar(activeModuleId); }
+  setActiveSidebarItem('item-' + lessonId);
+
+  // Breadcrumb
+  const breadcrumb = document.getElementById('lesson-breadcrumb');
+  if (breadcrumb) {
+    const sub = dbSubmodules.find(s => s.id === currentLesson.submodule_id);
+    const mod = dbModules.find(m => m.id === currentLesson.module_id);
+    if (sub) { breadcrumb.innerHTML = `${esc(mod?.title||'')} <span style="opacity:.4">›</span> ${esc(sub.title)}`; breadcrumb.style.display = 'flex'; }
+    else { breadcrumb.style.display = 'none'; }
+  }
 
   if (currentLesson.type === 'video') {
     document.getElementById('view-video').style.display = 'block'; document.getElementById('cv-video-title').textContent = currentLesson.title;
@@ -81,6 +141,9 @@ function showLesson(lessonId) {
     if (isDone) { const prev = dbProgress.find(p => p.lesson_id === lessonId); if (prev) showScore(prev.score, prev.total_questions, [], true); }
   }
 
+  // Soundboard — words/phrases tied to this lesson's subfolder
+  renderSoundboard(currentLesson.submodule_id);
+
   // Recording panel — position before complete/submit button
   const recPanel = document.getElementById('recording-panel');
   if (recPanel) {
@@ -94,6 +157,10 @@ function showLesson(lessonId) {
     recPanel.style.display = 'block';
   }
   initRecordingPanel(lessonId);
+
+  // Fluid fade-in transition
+  const main = document.querySelector('.c-main');
+  if (main) { main.classList.remove('fade-in'); void main.offsetWidth; main.classList.add('fade-in'); }
 }
 
 function renderPlayerQuestions(isDone = false) {
