@@ -3,6 +3,8 @@ let currentUser=null, isLoginMode=true;
 let dbModules=[], dbSubmodules=[], dbLessons=[], dbProgress=[];
 let dbProfiles=[], dbRecordings=[];
 let currentLesson=null, activeModuleId=null, currentViewedPostId=null;
+let sidebarOpenSubs = new Set();
+let dbSoundboard = [];
 
 let studentAnswers={}; let selectedDragChips={}; 
 let questionRows=[], tempAudios=[], isUploadingAudio=false;
