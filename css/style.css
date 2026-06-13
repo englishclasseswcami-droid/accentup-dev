@@ -599,3 +599,13 @@ footer strong{color:var(--brand)}
 .cert-footer{display:flex;justify-content:space-between;align-items:flex-end;margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--skool-border);font-size:12px;color:var(--text-muted)}
 .cert-sig{font-family:Georgia,serif;font-size:18px;font-style:italic;color:var(--text);margin-bottom:2px}
 .cert-actions{text-align:center;margin-top:1.5rem}
+
+/* Nav "More" dropdown */
+.nav-more-wrap{position:relative}
+.nav-more-btn{display:inline-flex;align-items:center;gap:4px}
+.nav-more-caret{font-size:10px;transition:transform .2s}
+.nav-more-wrap.open .nav-more-caret{transform:rotate(180deg)}
+.nav-more-wrap.open .nav-more-btn{background:var(--brand-light);color:var(--brand)}
+.nav-more-menu{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--skool-border);border-radius:var(--radius-sm);box-shadow:0 10px 30px rgba(0,0,0,.1);padding:6px;min-width:160px;flex-direction:column;gap:2px;z-index:50}
+.nav-more-wrap.open .nav-more-menu{display:flex}
+.nav-more-menu .nav-tab{width:100%;text-align:left;border-radius:8px;padding:8px 12px}
