@@ -252,7 +252,10 @@ nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.
 .c-subfolder-body.open{max-height:2000px;opacity:1}
 
 /* Breadcrumb above lesson content */
-.lesson-breadcrumb{display:none;align-items:center;gap:6px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--brand);margin-bottom:10px}
+.lesson-breadcrumb{display:none;align-items:center;gap:6px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--brand)}
+.speed-toggle{flex-shrink:0;background:var(--bg);border:1px solid var(--skool-border);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:700;color:var(--text-muted);cursor:pointer;transition:all .15s}
+.speed-toggle:hover{border-color:var(--brand);color:var(--brand)}
+.speed-toggle.active{background:var(--brand-light);border-color:var(--brand);color:var(--brand-dark)}
 
 /* Fluid fade-in transition when switching lessons */
 .c-main.fade-in{animation:cmFadeIn .35s ease}
@@ -577,3 +580,22 @@ footer strong{color:var(--brand)}
 .nav-tab.auth-btn{background:var(--brand);color:#fff;padding:8px 20px}
 .nav-tab.auth-btn:hover{background:var(--brand-dark);color:#fff}
 .nav-tab.logout-btn-nav{background:transparent;color:var(--text-muted);font-size:13px}
+
+/* Reference Library */
+.ref-group-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-light);margin:1.5rem 0 .6rem}
+.ref-group-title:first-child{margin-top:0}
+
+/* Certificate */
+.cert-wrap{max-width:760px;margin:2rem auto;padding:0 1rem}
+.cert-card{background:#fff;border:1px solid var(--skool-border);border-radius:var(--radius);padding:3rem 3rem 2.5rem;text-align:center;position:relative;box-shadow:0 12px 40px rgba(0,0,0,.06)}
+.cert-card::before{content:'';position:absolute;inset:14px;border:2px solid var(--brand-light);border-radius:calc(var(--radius) - 6px);pointer-events:none}
+.cert-logo{font-size:22px;font-weight:900;color:var(--brand);margin-bottom:1.5rem}
+.cert-logo .logo-text-up{color:var(--accent-dark)}
+.cert-eyebrow{font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--text-light);margin-bottom:.5rem}
+.cert-title{font-size:28px;font-weight:900;color:var(--text);letter-spacing:-.5px;margin-bottom:1.5rem}
+.cert-presented{font-size:13px;color:var(--text-muted);margin-bottom:.5rem}
+.cert-name{font-size:32px;font-weight:800;color:var(--brand-dark);font-family:Georgia,serif;margin-bottom:1.5rem;padding-bottom:8px;border-bottom:2px solid var(--brand-light);display:inline-block;min-width:300px}
+.cert-desc{font-size:14px;color:var(--text-muted);line-height:1.7;max-width:480px;margin:0 auto 1.5rem}
+.cert-footer{display:flex;justify-content:space-between;align-items:flex-end;margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--skool-border);font-size:12px;color:var(--text-muted)}
+.cert-sig{font-family:Georgia,serif;font-size:18px;font-style:italic;color:var(--text);margin-bottom:2px}
+.cert-actions{text-align:center;margin-top:1.5rem}
