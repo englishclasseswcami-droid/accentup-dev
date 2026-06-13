@@ -380,11 +380,14 @@
           <div id="soundboard-list"></div>
         </div>
 
-        <!-- Recording panel — shared across all lesson types -->
-        <div id="recording-panel" class="rec-panel" style="display:none">
+        <!-- Recording panel — floating widget, shared across all lesson types -->
+        <div id="recording-panel" class="rec-panel collapsed" style="display:none">
+          <button class="rec-fab" onclick="toggleRecPanel()">🎙</button>
+          <div class="rec-panel-body">
           <div class="rec-panel-header">
             <span class="rec-panel-title">🎙 Record your pronunciation</span>
             <span class="rec-prev-lbl" id="rec-prev-label"></span>
+            <button class="rec-panel-close" onclick="toggleRecPanel()">×</button>
           </div>
           <div id="rec-idle-view">
             <button class="rec-btn-start" onclick="startRecording()">⏺ Start recording</button>
@@ -412,6 +415,7 @@
             <div style="margin-top:8px">
               <button class="outline-btn" onclick="retakeRecording()" style="font-size:12px;padding:6px 14px">↺ Re-record</button>
             </div>
+          </div>
           </div>
         </div>
       </main>
@@ -502,6 +506,7 @@
           <hr style="border:0;border-top:1px solid var(--skool-border);margin:1.25rem 0"/>
           <div id="fields-video"><span class="field-label">YouTube URL</span><input type="url" id="t-les-video-url" placeholder="https://www.youtube.com/watch?v=..." style="margin-bottom:0;"/></div>
           <div id="fields-text"><span class="field-label" id="text-field-label" style="margin-top:12px">Introduction / Instructions (optional)</span><div id="quill-editor-container"></div></div>
+          <label style="display:flex;align-items:center;gap:8px;margin-top:1rem;font-size:13px;font-weight:600;color:var(--text);cursor:pointer"><input type="checkbox" id="t-les-show-soundboard" style="width:auto;margin:0"/> 🔊 Show this subfolder's Soundboard in this lesson</label>
           <div id="fields-embed" style="display:none"><span class="field-label">Embed code (iframe)</span><textarea id="t-les-embed-code" placeholder="Paste your iframe code here..." style="font-family:monospace;min-height:100px"></textarea></div>
           <div id="fields-task" style="display:none">
             <span class="field-label" style="margin-top: 1.5rem; margin-bottom: 8px;">Questions / Items</span>
