@@ -44,11 +44,28 @@ function toggleSidebarFolder(subId) {
   if (activeModuleId) renderSidebar(activeModuleId);
 }
 function setActiveSidebarItem(id) { document.querySelectorAll('.c-item').forEach(el => el.classList.remove('active')); document.getElementById(id)?.classList.add('active'); }
-function hideAllViews() { ['view-welcome','view-video','view-text','view-exercise','view-embed'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; }); const vp = document.getElementById('cv-video-player'); if (vp) vp.innerHTML = ''; const rp = document.getElementById('recording-panel'); if (rp) rp.style.display = 'none'; const bc = document.getElementById('lesson-breadcrumb'); if (bc) bc.style.display = 'none'; const sp = document.getElementById('soundboard-panel'); if (sp) sp.style.display = 'none'; stopSoundboardAudio(); }
+function hideAllViews() { ['view-welcome','view-video','view-text','view-exercise','view-embed'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; }); const vp = document.getElementById('cv-video-player'); if (vp) vp.innerHTML = ''; const rp = document.getElementById('recording-panel'); if (rp) rp.style.display = 'none'; const bc = document.getElementById('lesson-breadcrumb-row'); if (bc) bc.style.display = 'none'; const sp = document.getElementById('soundboard-panel'); if (sp) sp.style.display = 'none'; stopSoundboardAudio(); }
 /* ══════════════════════════════════════════
    SOUNDBOARD — embedded per-subfolder word/phrase practice
 ══════════════════════════════════════════ */
 let soundboardAudioEl = null;
+
+/* ══════════════════════════════════════════
+   PLAYBACK SPEED — applies to soundboard + lesson audio
+══════════════════════════════════════════ */
+const PLAYBACK_RATES = [1, 0.75, 1.25];
+function cyclePlaybackRate() {
+  const idx = PLAYBACK_RATES.indexOf(playbackRate);
+  playbackRate = PLAYBACK_RATES[(idx + 1) % PLAYBACK_RATES.length];
+  localStorage.setItem('au_playback_rate', playbackRate);
+  updateSpeedToggleLabel();
+  if (soundboardAudioEl) soundboardAudioEl.playbackRate = playbackRate;
+  document.querySelectorAll('#cv-video-audios audio, #cv-text-audios audio, #cv-embed-audios audio, .ex-question-block audio').forEach(a => a.playbackRate = playbackRate);
+}
+function updateSpeedToggleLabel() {
+  const btn = document.getElementById('speed-toggle-btn'); if (!btn) return;
+  btn.textContent = `⚡ ${playbackRate}x`; btn.classList.toggle('active', playbackRate !== 1);
+}
 
 function injectSoundboardTokens(html) {
   if (!html || !html.includes('{{sound:')) return html || '';
@@ -62,7 +79,7 @@ function playSoundboardAudio(itemId) {
   const item = dbSoundboard.find(s => s.id === itemId); if (!item || !item.audio_url) return;
   if (soundboardAudioEl && soundboardAudioEl._itemId === itemId && !soundboardAudioEl.paused) { stopSoundboardAudio(); return; }
   stopSoundboardAudio();
-  soundboardAudioEl = new Audio(item.audio_url); soundboardAudioEl._itemId = itemId;
+  soundboardAudioEl = new Audio(item.audio_url); soundboardAudioEl._itemId = itemId; soundboardAudioEl.playbackRate = playbackRate;
   const btn = document.getElementById('sb-play-' + itemId); if (btn) btn.classList.add('playing');
   soundboardAudioEl.play().catch(()=>{});
   soundboardAudioEl.onended = () => { if (btn) btn.classList.remove('playing'); soundboardAudioEl = null; };
@@ -72,7 +89,7 @@ function stopSoundboardAudio() {
   if (soundboardAudioEl) { soundboardAudioEl.pause(); const prevBtn = document.getElementById('sb-play-' + soundboardAudioEl._itemId); if (prevBtn) prevBtn.classList.remove('playing'); soundboardAudioEl = null; }
 }
 
-function renderAudios(panelId, list) { const el = document.getElementById(panelId); if (!el) return; const arr = safeParseJSON(list); if (!arr.length) { el.style.display = 'none'; return; } el.style.display = 'block'; el.innerHTML = arr.map(a => `<div class="lesson-audio-row"><span class="lesson-audio-label">🔊 ${esc(a.label)}</span><audio controls src="${esc(a.url)}"></audio></div>`).join(''); }
+function renderAudios(panelId, list) { const el = document.getElementById(panelId); if (!el) return; const arr = safeParseJSON(list); if (!arr.length) { el.style.display = 'none'; return; } el.style.display = 'block'; el.innerHTML = arr.map(a => `<div class="lesson-audio-row"><span class="lesson-audio-label">🔊 ${esc(a.label)}</span><audio controls src="${esc(a.url)}"></audio></div>`).join(''); el.querySelectorAll('audio').forEach(aEl => aEl.playbackRate = playbackRate); }
 function renderResources(panelId, list) { const el = document.getElementById(panelId); if (!el) return; const arr = safeParseJSON(list); if (!arr.length) { el.style.display = 'none'; return; } el.style.display = 'block'; el.innerHTML = `<div class="resources-heading">Resources</div><div class="resources-list">${arr.map(r => `<a href="${esc(r.url)}" target="_blank" class="resource-link">📎 ${esc(r.name)}</a>`).join('')}</div>`; }
 function updateCompleteButton(btnId, isDone) { const btn = document.getElementById(btnId); if (!btn) return; btn.textContent = isDone ? 'Completed ✅' : 'Mark as complete'; btn.style.background = isDone ? 'var(--green)' : 'var(--brand)'; btn.disabled = isDone; }
 async function markCurrentLessonComplete() {
@@ -115,14 +132,16 @@ function showLesson(lessonId) {
   if (currentLesson.submodule_id && !sidebarOpenSubs.has(currentLesson.submodule_id)) { sidebarOpenSubs.add(currentLesson.submodule_id); if (activeModuleId) renderSidebar(activeModuleId); }
   setActiveSidebarItem('item-' + lessonId);
 
-  // Breadcrumb
-  const breadcrumb = document.getElementById('lesson-breadcrumb');
-  if (breadcrumb) {
+  // Breadcrumb + speed toggle row
+  const breadcrumb = document.getElementById('lesson-breadcrumb'); const breadcrumbRow = document.getElementById('lesson-breadcrumb-row');
+  if (breadcrumb && breadcrumbRow) {
     const sub = dbSubmodules.find(s => s.id === currentLesson.submodule_id);
     const mod = dbModules.find(m => m.id === currentLesson.module_id);
-    if (sub) { breadcrumb.innerHTML = `${esc(mod?.title||'')} <span style="opacity:.4">›</span> ${esc(sub.title)}`; breadcrumb.style.display = 'flex'; }
-    else { breadcrumb.style.display = 'none'; }
+    breadcrumb.innerHTML = sub ? `${esc(mod?.title||'')} <span style="opacity:.4">›</span> ${esc(sub.title)}` : '';
+    breadcrumb.style.display = sub ? 'flex' : 'none';
+    breadcrumbRow.style.display = 'flex';
   }
+  updateSpeedToggleLabel();
 
   if (currentLesson.type === 'video') {
     document.getElementById('view-video').style.display = 'block'; document.getElementById('cv-video-title').textContent = currentLesson.title;
@@ -206,6 +225,7 @@ function renderPlayerQuestions(isDone = false) {
     let givenArr = Array.isArray(givenRaw) ? givenRaw : (givenRaw ? [givenRaw] : []);
     return `<div class="ex-question-block"><div class="ex-q-num">Question ${i+1}</div>${qMedia}<div class="ex-q-text">${esc(q.prompt)}</div>${isMulti ? '<div style="font-size:11px;color:var(--brand-mid);font-weight:600;margin-bottom:8px">✔ Select all correct answers</div>' : ''}<div class="options-grid">${shuffled.map((o,j)=>{ return `<button class="opt-btn ${givenArr.includes(o) ? 'selected' : ''}" id="opt-${i}-${j}" data-qi="${i}" data-oi="${j}" data-val="${esc(o)}" data-multi="${isMulti}" data-total="${shuffled.length}" onclick="handleOptClick(this)" ${disabledAttr}>${esc(o)}</button>`; }).join('')}</div>${isDone && q.teacher_note ? `<div class="teacher-note visible">${esc(q.teacher_note)}</div>` : `<div class="teacher-note" id="note-${i}">${esc(q.teacher_note||'')}</div>`}</div>`;
   }).join('');
+  wrap.querySelectorAll('audio').forEach(a => a.playbackRate = playbackRate);
 }
 
 function updateMultiBlank(i, pIdx, val, total) { if (!Array.isArray(studentAnswers[i])) studentAnswers[i] = new Array(total).fill(''); studentAnswers[i][pIdx] = val; }
