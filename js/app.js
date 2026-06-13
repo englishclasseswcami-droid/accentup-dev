@@ -132,11 +132,16 @@ async function handleAuth() {
   }
 }
 
-document.querySelectorAll('.nav-tab[data-page]').forEach(tab => { tab.onclick = () => { const page = tab.dataset.page; if (['classroom','teacher','profile','streaks','routine','dashboard','reference','certificate'].includes(page) && !currentUser) { goToPage('auth'); return; } goToPage(page); }; });
+document.querySelectorAll('.nav-tab[data-page]').forEach(tab => { tab.onclick = () => { const page = tab.dataset.page; if (['classroom','teacher','profile','streaks','routine','dashboard','reference','certificate'].includes(page) && !currentUser) { goToPage('auth'); closeNavMore(); return; } goToPage(page); closeNavMore(); }; });
+
+function toggleNavMore(e) { e.stopPropagation(); document.querySelector('.nav-more-wrap')?.classList.toggle('open'); }
+function closeNavMore() { document.querySelector('.nav-more-wrap')?.classList.remove('open'); }
+document.addEventListener('click', (e) => { if (!e.target.closest('.nav-more-wrap')) closeNavMore(); });
 
 function goToPage(pageId) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const tabBtn = document.querySelector(`.nav-tab[data-page="${pageId}"]`); if (tabBtn) tabBtn.classList.add('active');
+  if (tabBtn && tabBtn.closest('.nav-more-menu')) document.getElementById('nav-more-btn')?.classList.add('active');
   const pageEl = document.getElementById('page-' + pageId); if (pageEl) pageEl.classList.add('active');
   if (pageId === 'classroom') renderClassroomGrid();
   if (pageId === 'dashboard') renderDashboard();
