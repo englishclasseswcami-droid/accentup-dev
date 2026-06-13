@@ -214,7 +214,7 @@ nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.
 .course-card:hover .course-card-arrow{opacity:1;transform:translateX(0)}
 
 /* Soundboard */
-.soundboard-panel{margin-top:1.75rem;background:var(--surface);border:1px solid var(--skool-border);border-radius:var(--radius);padding:1.25rem}
+.soundboard-panel{margin:1.25rem 0;background:var(--surface);border:1px solid var(--skool-border);border-radius:var(--radius);padding:1.25rem}
 .soundboard-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-light);margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .soundboard-grid{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--skool-border);border-radius:var(--radius-sm);overflow:hidden}
 @media(max-width:560px){.soundboard-grid{grid-template-columns:1fr}}
