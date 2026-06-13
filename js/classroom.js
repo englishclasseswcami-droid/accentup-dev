@@ -50,17 +50,21 @@ function hideAllViews() { ['view-welcome','view-video','view-text','view-exercis
 ══════════════════════════════════════════ */
 let soundboardAudioEl = null;
 
-function renderSoundboard(submoduleId) {
-  const panel = document.getElementById('soundboard-panel'); const list = document.getElementById('soundboard-list');
-  if (!panel || !list) return;
+function buildSoundboardHtml(submoduleId) {
   const items = dbSoundboard.filter(s => s.submodule_id === submoduleId);
-  if (!items.length) { panel.style.display = 'none'; list.innerHTML = ''; return; }
-  panel.style.display = 'block';
+  if (!items.length) return '';
   const lastSpan = items.length % 2 !== 0;
-  list.innerHTML = `<div class="soundboard-grid">` + items.map((item, i) => {
+  const cells = items.map((item, i) => {
     const rowIdx = Math.floor(i / 2); const altClass = rowIdx % 2 === 1 ? ' alt' : ''; const spanClass = (lastSpan && i === items.length - 1) ? ' span-full' : '';
     return `<div class="soundboard-cell${altClass}${spanClass}"><div class="soundboard-cell-text"><span class="soundboard-word">${esc(item.text)}</span>${item.ipa ? `<span class="soundboard-ipa">${esc(item.ipa)}</span>` : ''}</div><button class="soundboard-play" id="sb-play-${item.id}" onclick="playSoundboardAudio('${item.id}')" ${!item.audio_url ? 'disabled style="opacity:.35;cursor:default"' : ''}>▶</button></div>`;
-  }).join('') + `</div>`;
+  }).join('');
+  return `<div class="soundboard-panel"><div class="soundboard-title">🔊 Soundboard</div><div class="soundboard-grid">${cells}</div></div>`;
+}
+
+function injectSoundboardBlocks(html, submoduleId) {
+  if (!html || !html.includes('{{soundboard}}')) return html || '';
+  const block = buildSoundboardHtml(submoduleId);
+  return html.replace(/<p>\s*\{\{soundboard\}\}\s*<\/p>/g, block).replace(/\{\{soundboard\}\}/g, block);
 }
 
 function playSoundboardAudio(itemId) {
@@ -132,22 +136,20 @@ function showLesson(lessonId) {
   if (currentLesson.type === 'video') {
     document.getElementById('view-video').style.display = 'block'; document.getElementById('cv-video-title').textContent = currentLesson.title;
     document.getElementById('cv-video-player').innerHTML = currentLesson.video_url ? `<iframe src="${esc(currentLesson.video_url)}" allowfullscreen allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"></iframe>` : '<div style="color:#fff;padding:2rem;text-align:center">No video</div>';
-    document.getElementById('cv-video-text').innerHTML = currentLesson.text_content || ''; renderAudios('cv-video-audios', audios); renderResources('cv-video-resources', resources); updateCompleteButton('btn-complete-video', isDone);
+    document.getElementById('cv-video-text').innerHTML = injectSoundboardBlocks(currentLesson.text_content, currentLesson.submodule_id); renderAudios('cv-video-audios', audios); renderResources('cv-video-resources', resources); updateCompleteButton('btn-complete-video', isDone);
   } else if (currentLesson.type === 'text') {
-    document.getElementById('view-text').style.display = 'block'; document.getElementById('cv-text-title').textContent = currentLesson.title; document.getElementById('cv-text-content').innerHTML = currentLesson.text_content || ''; renderAudios('cv-text-audios', audios); renderResources('cv-text-resources', resources); updateCompleteButton('btn-complete-text', isDone);
+    document.getElementById('view-text').style.display = 'block'; document.getElementById('cv-text-title').textContent = currentLesson.title; document.getElementById('cv-text-content').innerHTML = injectSoundboardBlocks(currentLesson.text_content, currentLesson.submodule_id); renderAudios('cv-text-audios', audios); renderResources('cv-text-resources', resources); updateCompleteButton('btn-complete-text', isDone);
   } else if (currentLesson.type === 'embed') {
-    document.getElementById('view-embed').style.display = 'block'; document.getElementById('cv-embed-title').textContent = currentLesson.title; document.getElementById('cv-embed-text').innerHTML = currentLesson.text_content || ''; document.getElementById('cv-embed-container').innerHTML = currentLesson.video_url || ''; renderAudios('cv-embed-audios', audios); renderResources('cv-embed-resources', resources); updateCompleteButton('btn-complete-embed', isDone);
+    document.getElementById('view-embed').style.display = 'block'; document.getElementById('cv-embed-title').textContent = currentLesson.title; document.getElementById('cv-embed-text').innerHTML = injectSoundboardBlocks(currentLesson.text_content, currentLesson.submodule_id); document.getElementById('cv-embed-container').innerHTML = currentLesson.video_url || ''; renderAudios('cv-embed-audios', audios); renderResources('cv-embed-resources', resources); updateCompleteButton('btn-complete-embed', isDone);
   } else if (currentLesson.type === 'task') {
     studentAnswers = {}; selectedDragChips = {}; document.getElementById('view-exercise').style.display = 'block'; document.getElementById('player-title').textContent = currentLesson.title;
-    const taskTextEl = document.getElementById('cv-task-text'); if (taskTextEl) { taskTextEl.innerHTML = currentLesson.text_content || ''; taskTextEl.style.display = (currentLesson.text_content && currentLesson.text_content !== '<p><br></p>') ? 'block' : 'none'; }
+    const taskTextEl = document.getElementById('cv-task-text'); if (taskTextEl) { const hasContent = currentLesson.text_content && currentLesson.text_content !== '<p><br></p>'; taskTextEl.innerHTML = hasContent ? injectSoundboardBlocks(currentLesson.text_content, currentLesson.submodule_id) : ''; taskTextEl.style.display = hasContent ? 'block' : 'none'; }
     document.getElementById('submit-btn').disabled = isDone; document.getElementById('submit-btn').style.display = isDone ? 'none' : 'inline-block'; document.getElementById('retry-btn').style.display = isDone ? 'inline-block' : 'none'; document.getElementById('score-area').innerHTML = '';
     renderAudios('cv-task-audios', audios); renderPlayerQuestions(isDone); renderResources('cv-task-resources', resources);
     if (isDone) { const prev = dbProgress.find(p => p.lesson_id === lessonId); if (prev) showScore(prev.score, prev.total_questions, [], true); }
   }
 
-  // Soundboard — only if the teacher enabled it for this specific lesson
-  if (currentLesson.show_soundboard) renderSoundboard(currentLesson.submodule_id);
-  else { const sp = document.getElementById('soundboard-panel'); if (sp) sp.style.display = 'none'; stopSoundboardAudio(); }
+  stopSoundboardAudio();
 
   // Recording panel — position before complete/submit button
   const recPanel = document.getElementById('recording-panel');
