@@ -36,14 +36,21 @@
   <div class="nav-tabs">
     <button class="nav-tab active" data-page="home" id="nav-home">Home</button>
     <button class="nav-tab" data-page="dashboard" id="nav-dashboard" style="display:none">Dashboard</button>
-    <button class="nav-tab" data-page="sounds" id="nav-sounds">Sounds</button>
     <button class="nav-tab" data-page="classroom" id="nav-classroom" style="display:none">Classroom</button>
     <button class="nav-tab" data-page="community" id="nav-community" style="display:none">Community</button>
-    <button class="nav-tab" data-page="routine" id="nav-routine-tab" style="display:none">📅 Routine</button>
-    <button class="nav-tab" data-page="reference" id="nav-reference-tab" style="display:none">📚 Reference</button>
-    <button class="nav-tab" data-page="streaks" id="nav-streaks-tab" style="display:none">🔥 Streaks</button>
-    <button class="nav-tab" data-page="profile" id="nav-profile-tab" style="display:none">Profile</button>
     <button class="nav-tab teacher-tab" id="nav-teacher-tab" data-page="teacher" style="display:none">Teacher ✦</button>
+
+    <div class="nav-more-wrap">
+      <button class="nav-tab nav-more-btn" id="nav-more-btn" onclick="toggleNavMore(event)">More <span class="nav-more-caret">▾</span></button>
+      <div class="nav-more-menu" id="nav-more-menu">
+        <button class="nav-tab" data-page="sounds" id="nav-sounds">Sounds</button>
+        <button class="nav-tab" data-page="routine" id="nav-routine-tab" style="display:none">📅 Routine</button>
+        <button class="nav-tab" data-page="reference" id="nav-reference-tab" style="display:none">📚 Reference</button>
+        <button class="nav-tab" data-page="streaks" id="nav-streaks-tab" style="display:none">🔥 Streaks</button>
+        <button class="nav-tab" data-page="profile" id="nav-profile-tab" style="display:none">Profile</button>
+      </div>
+    </div>
+
     <button class="nav-tab auth-btn" id="nav-auth-btn" onclick="handleNavAuth()">Log in</button>
   </div>
 </nav>
