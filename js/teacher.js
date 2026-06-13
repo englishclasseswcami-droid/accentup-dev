@@ -60,11 +60,27 @@ function editLesson(id) {
 }
 function cancelEditLes() { document.getElementById('edit-les-id').value = ''; document.getElementById('t-les-title').value = ''; document.getElementById('t-les-video-url').value = ''; document.getElementById('t-les-embed-code').value = ''; document.getElementById('t-les-resources').value = ''; document.getElementById('t-les-resources-current').textContent = ''; quillEditor.root.innerHTML = ''; questionRows = []; tempAudios = []; openQStates = {}; renderQFields(); renderTempAudios(); document.getElementById('panel-title-les').textContent = '📝 Add Lesson'; document.getElementById('btn-cancel-les').style.display = 'none'; }
 
-function insertSoundboardToken() {
-  const sel = quillEditor.getSelection();
-  const index = sel ? sel.index : quillEditor.getLength();
-  quillEditor.insertText(index, '{{soundboard}}\n');
-  quillEditor.setSelection(index + '{{soundboard}}\n'.length);
+let sbInsertCursorIndex = null;
+
+function toggleSoundInsertPicker() {
+  const picker = document.getElementById('sb-insert-picker');
+  const isHidden = picker.style.display === 'none' || !picker.style.display;
+  if (isHidden) {
+    const sel = quillEditor.getSelection(); sbInsertCursorIndex = sel ? sel.index : quillEditor.getLength();
+    const subId = document.getElementById('t-les-submodule').value;
+    const items = dbSoundboard.filter(s => s.submodule_id === subId);
+    const select = document.getElementById('sb-insert-select');
+    select.innerHTML = items.length ? items.map(it => `<option value="${it.id}">${esc(it.text)}${it.ipa ? ' '+esc(it.ipa) : ''}</option>`).join('') : '<option value="">No items in this subfolder yet</option>';
+    picker.style.display = 'flex';
+  } else { picker.style.display = 'none'; }
+}
+
+function confirmInsertSound() {
+  const select = document.getElementById('sb-insert-select'); const itemId = select.value; if (!itemId) return;
+  const index = sbInsertCursorIndex ?? quillEditor.getLength();
+  const token = `{{sound:${itemId}}} `;
+  quillEditor.insertText(index, token); quillEditor.setSelection(index + token.length);
+  document.getElementById('sb-insert-picker').style.display = 'none';
 }
 async function deleteLesson(id) { if (!confirm('Delete this lesson?')) return; await sb.from('lessons').delete().eq('id', id); fetchData(); }
 async function moveLesson(id, dir) { const les = dbLessons.find(l => l.id === id); if (!les) return; const siblings = dbLessons.filter(l => l.module_id === les.module_id && l.submodule_id === les.submodule_id); const idx = siblings.findIndex(l => l.id === id); const t = siblings[idx + dir]; if (!t) return; await sb.from('lessons').update({ order_index: t.order_index }).eq('id', id); await sb.from('lessons').update({ order_index: les.order_index }).eq('id', t.id); fetchData(); }
