@@ -145,8 +145,9 @@ function showLesson(lessonId) {
     if (isDone) { const prev = dbProgress.find(p => p.lesson_id === lessonId); if (prev) showScore(prev.score, prev.total_questions, [], true); }
   }
 
-  // Soundboard — words/phrases tied to this lesson's subfolder
-  renderSoundboard(currentLesson.submodule_id);
+  // Soundboard — only if the teacher enabled it for this specific lesson
+  if (currentLesson.show_soundboard) renderSoundboard(currentLesson.submodule_id);
+  else { const sp = document.getElementById('soundboard-panel'); if (sp) sp.style.display = 'none'; stopSoundboardAudio(); }
 
   // Recording panel — position before complete/submit button
   const recPanel = document.getElementById('recording-panel');
@@ -158,7 +159,7 @@ function showLesson(lessonId) {
       if (anchor) anchor.parentNode.insertBefore(recPanel, anchor);
       else viewEl.appendChild(recPanel);
     }
-    recPanel.style.display = 'block';
+    recPanel.style.display = 'block'; recPanel.classList.add('collapsed');
   }
   initRecordingPanel(lessonId);
 
