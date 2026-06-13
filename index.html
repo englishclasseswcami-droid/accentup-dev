@@ -500,8 +500,14 @@
           <hr style="border:0;border-top:1px solid var(--skool-border);margin:1.25rem 0"/>
           <div id="fields-video"><span class="field-label">YouTube URL</span><input type="url" id="t-les-video-url" placeholder="https://www.youtube.com/watch?v=..." style="margin-bottom:0;"/></div>
           <div id="fields-text"><span class="field-label" id="text-field-label" style="margin-top:12px">Introduction / Instructions (optional)</span><div id="quill-editor-container"></div>
-            <button type="button" class="secondary-btn" onclick="insertSoundboardToken()" style="margin-top:8px;font-size:12px">🔊 Insert Soundboard here</button>
-            <p style="font-size:11px;color:var(--text-muted);margin:4px 0 0">Places a marker in the text. You can insert it multiple times (e.g. once per Task) — each one shows this subfolder's Soundboard table at that exact spot.</p>
+            <div style="margin-top:8px">
+              <button type="button" class="secondary-btn" onclick="toggleSoundInsertPicker()" style="font-size:12px">🔊 Insert sound</button>
+              <div id="sb-insert-picker" style="display:none;align-items:center;gap:8px;margin-top:6px">
+                <select id="sb-insert-select" style="margin:0;flex:1;font-size:12px"></select>
+                <button type="button" class="primary-btn" onclick="confirmInsertSound()" style="margin:0;padding:7px 14px;font-size:12px;width:auto">Insert</button>
+              </div>
+              <p style="font-size:11px;color:var(--text-muted);margin:4px 0 0">Pick a word/phrase from this subfolder's Soundboard — a small ▶ button with its audio is inserted at your cursor. Make sure a Subfolder is selected above and it has items loaded in 🔊 Soundboard.</p>
+            </div>
           </div>
           <div id="fields-embed" style="display:none"><span class="field-label">Embed code (iframe)</span><textarea id="t-les-embed-code" placeholder="Paste your iframe code here..." style="font-family:monospace;min-height:100px"></textarea></div>
           <div id="fields-task" style="display:none">
