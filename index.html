@@ -40,6 +40,7 @@
     <button class="nav-tab" data-page="classroom" id="nav-classroom" style="display:none">Classroom</button>
     <button class="nav-tab" data-page="community" id="nav-community" style="display:none">Community</button>
     <button class="nav-tab" data-page="routine" id="nav-routine-tab" style="display:none">📅 Routine</button>
+    <button class="nav-tab" data-page="reference" id="nav-reference-tab" style="display:none">📚 Reference</button>
     <button class="nav-tab" data-page="streaks" id="nav-streaks-tab" style="display:none">🔥 Streaks</button>
     <button class="nav-tab" data-page="profile" id="nav-profile-tab" style="display:none">Profile</button>
     <button class="nav-tab teacher-tab" id="nav-teacher-tab" data-page="teacher" style="display:none">Teacher ✦</button>
@@ -313,6 +314,16 @@
   <div style="text-align:center;padding:3rem;color:var(--text-muted)"><div style="font-size:32px;margin-bottom:8px">📅</div><div style="font-size:14px">Loading your routine...</div></div>
 </div>
 
+<div class="page" id="page-reference">
+  <div class="section-intro"><h2>📚 Reference Library</h2><p>Every word and phrase from the Soundboard, in one searchable place. Find it, hear it, before any meeting or presentation.</p></div>
+  <input type="text" id="reference-search" class="gate-input" placeholder="🔍 Search a word or phrase..." style="margin-bottom:1.5rem;max-width:420px" oninput="renderReferenceLibrary()"/>
+  <div id="reference-list"></div>
+</div>
+
+<div class="page" id="page-certificate">
+  <div id="certificate-content"></div>
+</div>
+
 <div class="page page-full" id="page-community">
   <div class="community-container">
     <div id="community-feed-view">
@@ -352,7 +363,10 @@
         <div class="c-nav-list" id="sidebar-render"></div>
       </aside>
       <main class="c-main">
-        <div id="lesson-breadcrumb" class="lesson-breadcrumb"></div>
+        <div id="lesson-breadcrumb-row" style="display:none;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px">
+          <div id="lesson-breadcrumb" class="lesson-breadcrumb" style="margin-bottom:0"></div>
+          <button class="speed-toggle" id="speed-toggle-btn" onclick="cyclePlaybackRate()" title="Playback speed for audio">⚡ 1x</button>
+        </div>
         <div id="view-welcome" class="c-empty-state"><div style="font-size:40px;margin-bottom:12px">👋</div><h2 style="color:var(--text);font-weight:800;margin-bottom:8px;font-size:18px">Welcome!</h2><p>Select a lesson from the menu on the left to get started.</p></div>
         <div id="view-video" style="display:none">
           <h2 id="cv-video-title" class="lesson-title-main"></h2><div id="cv-video-audios" class="lesson-audios-box" style="display:none"></div><div id="cv-video-player" class="video-container"></div><div id="cv-video-text" class="text-content-main ql-editor" style="border:none;padding:0;margin-top:1.5rem"></div><div id="cv-video-resources" class="resources-panel" style="display:none"></div><div class="lesson-complete-wrap"><button class="submit-btn" id="btn-complete-video" onclick="markCurrentLessonComplete()">Mark as complete</button></div>
@@ -577,6 +591,7 @@
 
 
 <!-- App scripts — order matters for dependencies -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="js/config.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/data.js"></script>
