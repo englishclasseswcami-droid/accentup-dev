@@ -56,7 +56,11 @@ function renderSoundboard(submoduleId) {
   const items = dbSoundboard.filter(s => s.submodule_id === submoduleId);
   if (!items.length) { panel.style.display = 'none'; list.innerHTML = ''; return; }
   panel.style.display = 'block';
-  list.innerHTML = items.map(item => `<div class="soundboard-row"><button class="soundboard-play" id="sb-play-${item.id}" onclick="playSoundboardAudio('${item.id}')" ${!item.audio_url ? 'disabled style="opacity:.35;cursor:default"' : ''}>▶</button><span class="soundboard-word">${esc(item.text)}</span>${item.ipa ? `<span class="soundboard-ipa">${esc(item.ipa)}</span>` : ''}</div>`).join('');
+  const lastSpan = items.length % 2 !== 0;
+  list.innerHTML = `<div class="soundboard-grid">` + items.map((item, i) => {
+    const rowIdx = Math.floor(i / 2); const altClass = rowIdx % 2 === 1 ? ' alt' : ''; const spanClass = (lastSpan && i === items.length - 1) ? ' span-full' : '';
+    return `<div class="soundboard-cell${altClass}${spanClass}"><div class="soundboard-cell-text"><span class="soundboard-word">${esc(item.text)}</span>${item.ipa ? `<span class="soundboard-ipa">${esc(item.ipa)}</span>` : ''}</div><button class="soundboard-play" id="sb-play-${item.id}" onclick="playSoundboardAudio('${item.id}')" ${!item.audio_url ? 'disabled style="opacity:.35;cursor:default"' : ''}>▶</button></div>`;
+  }).join('') + `</div>`;
 }
 
 function playSoundboardAudio(itemId) {
