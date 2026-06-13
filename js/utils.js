@@ -5,6 +5,7 @@ let dbProfiles=[], dbRecordings=[];
 let currentLesson=null, activeModuleId=null, currentViewedPostId=null;
 let sidebarOpenSubs = new Set();
 let dbSoundboard = [];
+let playbackRate = parseFloat(localStorage.getItem('au_playback_rate') || '1');
 
 let studentAnswers={}; let selectedDragChips={}; 
 let questionRows=[], tempAudios=[], isUploadingAudio=false;
