@@ -41,6 +41,7 @@ function updateAuthUI() {
   show('nav-classroom',  isLoggedIn && !isTeacher);
   show('nav-community',  isLoggedIn);
   show('nav-routine-tab', isLoggedIn && !isTeacher);
+  show('nav-reference-tab', isLoggedIn);
   show('nav-streaks-tab', isLoggedIn);
   show('nav-profile-tab', isLoggedIn && !isTeacher);
   show('nav-teacher-tab', isTeacher);
@@ -53,7 +54,7 @@ function updateAuthUI() {
   } else {
     btn.textContent = 'Log in'; btn.classList.remove('logout-btn-nav'); btn.classList.add('auth-btn');
     const activePage = document.querySelector('.page.active')?.id;
-    const protectedPages = ['page-dashboard','page-classroom','page-teacher','page-profile','page-streaks','page-routine'];
+    const protectedPages = ['page-dashboard','page-classroom','page-teacher','page-profile','page-streaks','page-routine','page-reference','page-certificate'];
     if (protectedPages.includes(activePage)) goToPage('home');
   }
 }
@@ -131,7 +132,7 @@ async function handleAuth() {
   }
 }
 
-document.querySelectorAll('.nav-tab[data-page]').forEach(tab => { tab.onclick = () => { const page = tab.dataset.page; if (['classroom','teacher','profile','streaks','routine','dashboard'].includes(page) && !currentUser) { goToPage('auth'); return; } goToPage(page); }; });
+document.querySelectorAll('.nav-tab[data-page]').forEach(tab => { tab.onclick = () => { const page = tab.dataset.page; if (['classroom','teacher','profile','streaks','routine','dashboard','reference','certificate'].includes(page) && !currentUser) { goToPage('auth'); return; } goToPage(page); }; });
 
 function goToPage(pageId) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -144,6 +145,8 @@ function goToPage(pageId) {
   if (pageId === 'sounds') buildAllSoundsGrids();
   if (pageId === 'community') loadPosts();
   if (pageId === 'routine') renderRoutine();
+  if (pageId === 'reference') renderReferenceLibrary();
+  if (pageId === 'certificate') renderCertificate();
   if (pageId === 'profile') { const p = dbProfiles.find(x => x.id === currentUser?.id); if (p) document.getElementById('profile-username').value = p.username || ''; }
   window.scrollTo(0, 0);
 }
