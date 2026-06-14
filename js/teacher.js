@@ -64,7 +64,6 @@ let sbInsertCursorIndex = null;
 
 /* ── TABLE INSERT ── */
 function insertQuillTable() {
-  // Simple prompt for now — rows x cols
   const rows = parseInt(prompt('Number of rows:', '3'), 10);
   const cols = parseInt(prompt('Number of columns:', '3'), 10);
   if (!rows || !cols || rows < 1 || cols < 1) return;
@@ -73,17 +72,44 @@ function insertQuillTable() {
   for (let r = 0; r < rows; r++) {
     tableHtml += '<tr>';
     for (let c = 0; c < cols; c++) {
-      tableHtml += r === 0 ? '<th><br></th>' : '<td><br></td>';
+      tableHtml += r === 0 ? '<th contenteditable="true"><br></th>' : '<td contenteditable="true"><br></td>';
     }
     tableHtml += '</tr>';
   }
-  tableHtml += '</tbody></table><p><br></p>';
+  tableHtml += '</tbody></table>';
 
+  const editor = quillEditor.root;
   const sel = quillEditor.getSelection();
-  const index = sel ? sel.index : quillEditor.getLength();
-  const delta = quillEditor.clipboard.convert(tableHtml);
-  quillEditor.updateContents(delta, 'user');
-  quillEditor.setSelection(index + 1);
+
+  let insertAfter = null;
+  if (sel) {
+    const [leaf] = quillEditor.getLeaf(sel.index);
+    if (leaf && leaf.domNode) {
+      let node = leaf.domNode;
+      while (node && node.parentNode !== editor) node = node.parentNode;
+      insertAfter = node;
+    }
+  }
+
+  const temp = document.createElement('div');
+  temp.innerHTML = tableHtml;
+  const table = temp.firstChild;
+  const p = document.createElement('p'); p.innerHTML = '<br>';
+
+  if (insertAfter && insertAfter.nextSibling) {
+    editor.insertBefore(table, insertAfter.nextSibling);
+    editor.insertBefore(p, table.nextSibling);
+  } else {
+    editor.appendChild(table);
+    editor.appendChild(p);
+  }
+
+  const firstCell = table.querySelector('th, td');
+  if (firstCell) {
+    firstCell.focus();
+    const r = document.createRange(); r.selectNodeContents(firstCell); r.collapse(false);
+    const s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+  }
 }
 
 function toggleSoundInsertPicker() {
