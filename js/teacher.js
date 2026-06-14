@@ -62,6 +62,30 @@ function cancelEditLes() { document.getElementById('edit-les-id').value = ''; do
 
 let sbInsertCursorIndex = null;
 
+/* ── TABLE INSERT ── */
+function insertQuillTable() {
+  // Simple prompt for now — rows x cols
+  const rows = parseInt(prompt('Number of rows:', '3'), 10);
+  const cols = parseInt(prompt('Number of columns:', '3'), 10);
+  if (!rows || !cols || rows < 1 || cols < 1) return;
+
+  let tableHtml = '<table><tbody>';
+  for (let r = 0; r < rows; r++) {
+    tableHtml += '<tr>';
+    for (let c = 0; c < cols; c++) {
+      tableHtml += r === 0 ? '<th><br></th>' : '<td><br></td>';
+    }
+    tableHtml += '</tr>';
+  }
+  tableHtml += '</tbody></table><p><br></p>';
+
+  const sel = quillEditor.getSelection();
+  const index = sel ? sel.index : quillEditor.getLength();
+  const delta = quillEditor.clipboard.convert(tableHtml);
+  quillEditor.updateContents(delta, 'user');
+  quillEditor.setSelection(index + 1);
+}
+
 function toggleSoundInsertPicker() {
   const picker = document.getElementById('sb-insert-picker');
   const isHidden = picker.style.display === 'none' || !picker.style.display;
