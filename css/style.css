@@ -615,7 +615,10 @@ footer strong{color:var(--brand)}
 .ql-table.ql-active::before{color:var(--brand)}
 
 /* Tables — editor + student view */
-.ql-editor table,.c-main table,.cv-text-body table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:14px}
-.ql-editor table th,.c-main table th,.cv-text-body table th{background:var(--brand-light);color:var(--brand-dark);font-weight:700;text-align:left;padding:9px 12px;border:1px solid var(--skool-border)}
-.ql-editor table td,.c-main table td,.cv-text-body table td{padding:8px 12px;border:1px solid var(--skool-border);vertical-align:top;line-height:1.5}
-.ql-editor table tr:nth-child(even) td,.c-main table tr:nth-child(even) td,.cv-text-body table tr:nth-child(even) td{background:var(--bg)}
+/* Tables — editor + student view */
+.ql-editor table,.c-main table,.cv-text-body table{width:100%!important;border-collapse:collapse!important;margin:1rem 0!important;font-size:14px!important;display:table!important}
+.ql-editor table tbody,.c-main table tbody,.cv-text-body table tbody{display:table-row-group!important}
+.ql-editor table tr,.c-main table tr,.cv-text-body table tr{display:table-row!important}
+.ql-editor table th,.c-main table th,.cv-text-body table th{display:table-cell!important;background:var(--brand-light)!important;color:var(--brand-dark)!important;font-weight:700!important;text-align:left!important;padding:9px 12px!important;border:1px solid var(--skool-border)!important}
+.ql-editor table td,.c-main table td,.cv-text-body table td{display:table-cell!important;padding:8px 12px!important;border:1px solid var(--skool-border)!important;vertical-align:top!important;line-height:1.5!important;min-width:80px!important}
+.ql-editor table tr:nth-child(even) td,.c-main table tr:nth-child(even) td,.cv-text-body table tr:nth-child(even) td{background:var(--bg)!important}
