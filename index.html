@@ -520,7 +520,14 @@
           </div>
           <hr style="border:0;border-top:1px solid var(--skool-border);margin:1.25rem 0"/>
           <div id="fields-video"><span class="field-label">YouTube URL</span><input type="url" id="t-les-video-url" placeholder="https://www.youtube.com/watch?v=..." style="margin-bottom:0;"/></div>
-          <div id="fields-text"><span class="field-label" id="text-field-label" style="margin-top:12px">Introduction / Instructions (optional)</span><div id="quill-editor-container"></div>
+          <div id="fields-text"><span class="field-label" id="text-field-label" style="margin-top:12px">Introduction / Instructions (optional)</span>
+            <div id="quill-editor-container"></div>
+            <input type="hidden" id="quill-tables-html"/>
+            <div id="quill-tables-preview" style="display:none;border:1px solid var(--skool-border);border-radius:var(--radius-sm);padding:1rem;margin-top:8px;background:var(--bg)">
+              <div style="font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">⊞ Tables in this lesson</div>
+              <div id="quill-tables-list"></div>
+              <button type="button" class="outline-btn" onclick="clearAllTables()" style="font-size:11px;padding:4px 12px;margin-top:8px">Remove all tables</button>
+            </div>
             <div style="margin-top:8px">
               <button type="button" class="secondary-btn" onclick="toggleSoundInsertPicker()" style="font-size:12px">🔊 Insert sound</button>
               <div id="sb-insert-picker" style="display:none;align-items:center;gap:8px;margin-top:6px">
