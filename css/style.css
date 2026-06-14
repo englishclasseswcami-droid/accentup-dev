@@ -609,3 +609,13 @@ footer strong{color:var(--brand)}
 .nav-more-menu{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--skool-border);border-radius:var(--radius-sm);box-shadow:0 10px 30px rgba(0,0,0,.1);padding:6px;min-width:160px;flex-direction:column;gap:2px;z-index:50}
 .nav-more-wrap.open .nav-more-menu{display:flex}
 .nav-more-menu .nav-tab{width:100%;text-align:left;border-radius:8px;padding:8px 12px}
+
+/* Quill toolbar — table button icon */
+.ql-table::before{content:'⊞';font-size:15px;line-height:1}
+.ql-table.ql-active::before{color:var(--brand)}
+
+/* Tables — editor + student view */
+.ql-editor table,.c-main table,.cv-text-body table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:14px}
+.ql-editor table th,.c-main table th,.cv-text-body table th{background:var(--brand-light);color:var(--brand-dark);font-weight:700;text-align:left;padding:9px 12px;border:1px solid var(--skool-border)}
+.ql-editor table td,.c-main table td,.cv-text-body table td{padding:8px 12px;border:1px solid var(--skool-border);vertical-align:top;line-height:1.5}
+.ql-editor table tr:nth-child(even) td,.c-main table tr:nth-child(even) td,.cv-text-body table tr:nth-child(even) td{background:var(--bg)}
