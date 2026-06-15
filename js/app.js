@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function handleNavAuth() {
   if (currentUser) {
-    try { await sb.auth.signOut(); } catch(e) { console.error('Sign out error:', e); }
+    try { localStorage.removeItem('au_last_page'); await sb.auth.signOut(); } catch(e) { console.error('Sign out error:', e); }
   } else {
     goToPage('auth');
   }
@@ -153,6 +153,7 @@ function goToPage(pageId) {
   if (pageId === 'reference') renderReferenceLibrary();
   if (pageId === 'certificate') renderCertificate();
   if (pageId === 'profile') { const p = dbProfiles.find(x => x.id === currentUser?.id); if (p) document.getElementById('profile-username').value = p.username || ''; }
+  if (!['auth','home'].includes(pageId)) localStorage.setItem('au_last_page', pageId);
   window.scrollTo(0, 0);
 }
 
@@ -201,6 +202,23 @@ async function fetchData() {
     }
     if (document.getElementById('page-streaks').classList.contains('active')) renderStreaks();
     if (document.getElementById('page-routine')?.classList.contains('active')) renderRoutine();
+
+    // Restore last visited page, or go to Dashboard/Teacher by default
+    const activePage = document.querySelector('.page.active')?.id;
+    const onLandingOrAuth = !activePage || activePage === 'page-home' || activePage === 'page-auth';
+    if (onLandingOrAuth) {
+      const isTeacherUser = currentUser?.email?.toLowerCase() === TEACHER_EMAIL.toLowerCase();
+      if (isTeacherUser) { goToPage('teacher'); }
+      else {
+        const lastPage = localStorage.getItem('au_last_page');
+        const validPages = ['dashboard','classroom','community','routine','reference','streaks','profile','sounds','certificate'];
+        goToPage(lastPage && validPages.includes(lastPage) ? lastPage : 'dashboard');
+      }
+    } else {
+      // Already on a page (e.g. refresh) — re-render it with fresh data
+      const currentPageId = activePage?.replace('page-', '');
+      if (currentPageId && currentPageId !== 'home' && currentPageId !== 'auth') goToPage(currentPageId);
+    }
   } catch (error) { console.error("Error fetching data:", error); }
 }
 
