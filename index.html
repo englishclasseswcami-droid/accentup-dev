@@ -34,7 +34,7 @@
     <span class="logo-dot"></span>
   </div>
   <div class="nav-tabs">
-    <button class="nav-tab active" data-page="home" id="nav-home">Home</button>
+    <button class="nav-tab active" data-page="sounds" id="nav-sounds">Sounds</button>
     <button class="nav-tab" data-page="dashboard" id="nav-dashboard" style="display:none">Dashboard</button>
     <button class="nav-tab" data-page="classroom" id="nav-classroom" style="display:none">Classroom</button>
     <button class="nav-tab" data-page="community" id="nav-community" style="display:none">Community</button>
@@ -43,7 +43,6 @@
     <div class="nav-more-wrap">
       <button class="nav-tab nav-more-btn" id="nav-more-btn" onclick="toggleNavMore(event)">More <span class="nav-more-caret">▾</span></button>
       <div class="nav-more-menu" id="nav-more-menu">
-        <button class="nav-tab" data-page="sounds" id="nav-sounds">Sounds</button>
         <button class="nav-tab" data-page="routine" id="nav-routine-tab" style="display:none">📅 Routine</button>
         <button class="nav-tab" data-page="reference" id="nav-reference-tab" style="display:none">📚 Reference</button>
         <button class="nav-tab" data-page="streaks" id="nav-streaks-tab" style="display:none">🔥 Streaks</button>
@@ -58,40 +57,6 @@
 <div class="page" id="page-dashboard">
   <div style="text-align:center;padding:3rem;color:var(--text-muted);font-size:14px">Loading dashboard...</div>
 </div>
-
-<div class="page active lp-page" id="page-home">
-
-  <!-- ── HERO ── -->
-  <section class="lp-hero">
-    <div class="lp-container lp-hero-inner">
-      <div style="text-align:left">
-        <span class="lp-tag">For professional women · Intermediate / Advanced English</span>
-        <h1 class="lp-h1">Speak English with the same <em>authority</em> you have in your native language.</h1>
-        <p class="lp-subtitle">You already know the grammar and have the vocabulary, but your lack of confidence when speaking is hitting a career ceiling. Unlock your oral fluency in 6 months with AccentUp.</p>
-        <a href="https://wa.me/message/KUNJIAWCYFHVF1" target="_blank" class="lp-cta-btn">👉 Let's chat on WhatsApp</a>
-        <span class="lp-micro">Personalized, 1-on-1 6-month program · Strictly limited spots</span>
-      </div>
-      <div class="lp-hero-visual">
-        <img src="https://images.unsplash.com/photo-1573164713988-8665fc963095?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Professional woman speaking confidently" class="lp-hero-img"/>
-        <div class="lp-hero-badge">
-          <div class="lp-hero-badge-num">6</div>
-          <div class="lp-hero-badge-text">Month<br>Program</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── STATS BAR ── -->
-  <div class="lp-stats-bar">
-    <div class="lp-container">
-      <div class="lp-stats-grid">
-        <div class="lp-stat"><strong>1-on-1</strong><span>Live Sessions</span></div>
-        <div class="lp-stat"><strong>24/7</strong><span>Platform Access</span></div>
-        <div class="lp-stat"><strong>6</strong><span>Months to Fluency</span></div>
-        <div class="lp-stat"><strong>100%</strong><span>Personalized</span></div>
-      </div>
-    </div>
-  </div>
 
   <!-- ── PAIN POINTS ── -->
   <section class="lp-section cream">
@@ -249,7 +214,7 @@
 
 </div>
 
-<div class="page" id="page-sounds">
+<div class="page active" id="page-sounds">
   <div class="section-intro"><h2>Sounds of American English</h2><p>Explore the 19 vowel sounds and 24 consonant sounds. Click any card to explore mouth position, spellings, and tips.</p></div>
   <div style="margin-bottom:1.5rem">
     <input type="text" id="sounds-search" placeholder="🔍  Search by sound, word, or name — e.g. /ɪ/, hit, Short I" oninput="filterSounds(this.value)" style="margin-bottom:0;border-radius:30px;padding:10px 18px;font-size:14px"/>
