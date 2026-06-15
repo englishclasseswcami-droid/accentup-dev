@@ -30,12 +30,11 @@ function updateAuthUI() {
   const isTeacher = isLoggedIn && currentUser?.email?.toLowerCase() === TEACHER_EMAIL.toLowerCase();
 
   // Public tabs (always visible)
-  // 'home' and 'sounds' always shown when logged out; 'sounds' always shown
+  // Sounds is always shown (public landing)
 
   // App tabs visibility
   const show = (id, visible) => { const el = document.getElementById(id); if (el) el.style.display = visible ? 'inline-block' : 'none'; };
 
-  show('nav-home',       !isLoggedIn);
   show('nav-dashboard',  isLoggedIn && !isTeacher);
   show('nav-sounds',     true);
   show('nav-classroom',  isLoggedIn && !isTeacher);
@@ -55,7 +54,7 @@ function updateAuthUI() {
     btn.textContent = 'Log in'; btn.classList.remove('logout-btn-nav'); btn.classList.add('auth-btn');
     const activePage = document.querySelector('.page.active')?.id;
     const protectedPages = ['page-dashboard','page-classroom','page-teacher','page-profile','page-streaks','page-routine','page-reference','page-certificate'];
-    if (protectedPages.includes(activePage)) goToPage('home');
+    if (protectedPages.includes(activePage)) goToPage('sounds');
   }
 }
 
@@ -153,7 +152,7 @@ function goToPage(pageId) {
   if (pageId === 'reference') renderReferenceLibrary();
   if (pageId === 'certificate') renderCertificate();
   if (pageId === 'profile') { const p = dbProfiles.find(x => x.id === currentUser?.id); if (p) document.getElementById('profile-username').value = p.username || ''; }
-  if (!['auth','home'].includes(pageId)) localStorage.setItem('au_last_page', pageId);
+  if (!['auth','sounds'].includes(pageId)) localStorage.setItem('au_last_page', pageId);
   window.scrollTo(0, 0);
 }
 
@@ -205,7 +204,7 @@ async function fetchData() {
 
     // Restore last visited page, or go to Dashboard/Teacher by default
     const activePage = document.querySelector('.page.active')?.id;
-    const onLandingOrAuth = !activePage || activePage === 'page-home' || activePage === 'page-auth';
+    const onLandingOrAuth = !activePage || activePage === 'page-sounds' || activePage === 'page-auth';
     if (onLandingOrAuth) {
       const isTeacherUser = currentUser?.email?.toLowerCase() === TEACHER_EMAIL.toLowerCase();
       if (isTeacherUser) { goToPage('teacher'); }
@@ -217,7 +216,7 @@ async function fetchData() {
     } else {
       // Already on a page (e.g. refresh) — re-render it with fresh data
       const currentPageId = activePage?.replace('page-', '');
-      if (currentPageId && currentPageId !== 'home' && currentPageId !== 'auth') goToPage(currentPageId);
+      if (currentPageId && currentPageId !== 'sounds' && currentPageId !== 'auth') goToPage(currentPageId);
     }
   } catch (error) { console.error("Error fetching data:", error); }
 }
