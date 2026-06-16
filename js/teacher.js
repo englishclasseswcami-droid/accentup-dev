@@ -619,9 +619,11 @@ function confirmInsertSound() {
   if (!checked.length) return;
   let index = sbInsertCursorIndex ?? quillEditor.getLength();
   checked.forEach(cb => {
-    const token = `{{sound:${cb.dataset.id}}} `;
+    const token = `{{sound:${cb.dataset.id}}}`;
     quillEditor.insertText(index, token);
     index += token.length;
+    quillEditor.insertText(index, '\n');
+    index += 1;
   });
   quillEditor.setSelection(index);
   document.getElementById('sb-insert-picker').style.display = 'none';
