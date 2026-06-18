@@ -145,7 +145,7 @@ function goToPage(pageId, scroll = true) {
   const pageEl = document.getElementById('page-' + pageId); if (pageEl) pageEl.classList.add('active');
   if (pageId === 'classroom') renderClassroomGrid();
   if (pageId === 'dashboard') renderDashboard();
-  if (pageId === 'teacher') { renderManageList(); updateModuleSelect(); updatePendingBadge(); }
+  if (pageId === 'teacher') { renderManageList(); updatePendingBadge(); goToPage('classroom'); return; }
   if (pageId === 'streaks') renderStreaks();
   if (pageId === 'sounds') buildAllSoundsGrids();
   if (pageId === 'community') loadPosts();
@@ -208,7 +208,7 @@ async function fetchData() {
     const onLandingOrAuth = !activePage || activePage === 'page-sounds' || activePage === 'page-auth';
     if (onLandingOrAuth) {
       const isTeacherUser = currentUser?.email?.toLowerCase() === TEACHER_EMAIL.toLowerCase();
-      if (isTeacherUser) { goToPage('teacher'); }
+      if (isTeacherUser) { goToPage('classroom'); }
       else {
         const lastPage = localStorage.getItem('au_last_page');
         const validPages = ['dashboard','classroom','community','routine','reference','streaks','profile','sounds','certificate'];
