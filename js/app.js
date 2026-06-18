@@ -114,6 +114,7 @@ async function updatePassword() {
   alert('Password updated! Welcome back.');
   updateAuthUI();
   if (currentUser) fetchData();
+  else { buildAllSoundsGrids(); const loader = document.getElementById('au-loading'); if (loader) { loader.style.opacity='0'; setTimeout(()=>loader.remove(),200); } }
 }
 
 async function handleAuth() {
