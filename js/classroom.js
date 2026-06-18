@@ -72,17 +72,24 @@ function fmtSbTime(s) { const m = Math.floor(s/60); return `${m}:${String(Math.f
 
 function playSoundboardAudio(itemId) {
   const item = dbSoundboard.find(s => s.id === itemId); if (!item || !item.audio_url) return;
+  // Toggle pause/resume on same item
   if (soundboardAudioEl && soundboardAudioEl._itemId === itemId) {
-    if (!soundboardAudioEl.paused) { soundboardAudioEl.pause(); const lbl = document.querySelector('#sb-play-'+itemId+' .sb-mini-label'); if (lbl) lbl.textContent = '▶ '+item.text; return; }
-    else { soundboardAudioEl.play(); const lbl = document.querySelector('#sb-play-'+itemId+' .sb-mini-label'); if (lbl) lbl.textContent = '⏸ '+item.text; soundboardRafId = requestAnimationFrame(() => sbTick(itemId)); return; }
+    if (!soundboardAudioEl.paused) {
+      soundboardAudioEl.pause();
+      const btn = document.getElementById('sb-play-'+itemId); if (btn) btn.textContent = '▶ '+item.text;
+    } else {
+      soundboardAudioEl.play();
+      const btn = document.getElementById('sb-play-'+itemId); if (btn) btn.textContent = '⏸ '+item.text;
+      soundboardRafId = requestAnimationFrame(() => sbTick(itemId));
+    }
+    return;
   }
   stopSoundboardAudio();
-  soundboardAudioEl = new Audio(item.audio_url); soundboardAudioEl._itemId = itemId; soundboardAudioEl.playbackRate = playbackRate; soundboardAudioEl.loop = soundboardLoopEnabled;
-  const btn = document.getElementById('sb-play-'+itemId);
-  if (btn) {
-    btn.innerHTML = `<span class="sb-mini-label">⏸ ${esc(item.text)}</span><span class="sb-mini-bar-wrap" onclick="event.stopPropagation();sbSeek(event,this,'${itemId}')"><span class="sb-mini-bar-fill" id="sb-fill-${itemId}"></span></span><span class="sb-mini-time" id="sb-time-${itemId}">0:00</span><button class="sb-loop-btn${soundboardLoopEnabled?' active':''}" onclick="event.stopPropagation();toggleSbLoop('${itemId}')" title="Loop">↺</button>`;
-    btn.classList.add('playing');
-  }
+  soundboardAudioEl = new Audio(item.audio_url); soundboardAudioEl._itemId = itemId;
+  soundboardAudioEl.playbackRate = playbackRate; soundboardAudioEl.loop = soundboardLoopEnabled;
+  const btn = document.getElementById('sb-play-'+itemId); if (btn) { btn.textContent = '⏸ '+item.text; btn.classList.add('playing'); }
+  const prog = document.getElementById('sb-prog-'+itemId); if (prog) prog.style.display = 'inline-flex';
+  const loopBtn = document.querySelector('#sb-prog-'+itemId+' .sb-loop-btn'); if (loopBtn) loopBtn.classList.toggle('active', soundboardLoopEnabled);
   soundboardAudioEl.play().catch(()=>{});
   soundboardAudioEl.onended = () => { if (!soundboardLoopEnabled) resetSbBtn(itemId, item.text); };
   soundboardRafId = requestAnimationFrame(() => sbTick(itemId));
@@ -98,16 +105,18 @@ function sbTick(itemId) {
 
 function sbSeek(event, barEl, itemId) {
   if (!soundboardAudioEl || soundboardAudioEl._itemId !== itemId || !soundboardAudioEl.duration) return;
-  const rect = barEl.getBoundingClientRect(); soundboardAudioEl.currentTime = ((event.clientX - rect.left) / rect.width) * soundboardAudioEl.duration;
+  const rect = barEl.getBoundingClientRect();
+  soundboardAudioEl.currentTime = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)) * soundboardAudioEl.duration;
 }
 
 function toggleSbLoop(itemId) {
   soundboardLoopEnabled = !soundboardLoopEnabled; if (soundboardAudioEl) soundboardAudioEl.loop = soundboardLoopEnabled;
-  const loopBtn = document.querySelector('#sb-play-'+itemId+' .sb-loop-btn'); if (loopBtn) loopBtn.classList.toggle('active', soundboardLoopEnabled);
+  const loopBtn = document.querySelector('#sb-prog-'+itemId+' .sb-loop-btn'); if (loopBtn) loopBtn.classList.toggle('active', soundboardLoopEnabled);
 }
 
 function resetSbBtn(itemId, text) {
-  const btn = document.getElementById('sb-play-'+itemId); if (btn) { btn.innerHTML = `▶ ${esc(text)}`; btn.classList.remove('playing'); }
+  const btn = document.getElementById('sb-play-'+itemId); if (btn) { btn.textContent = '▶ '+text; btn.classList.remove('playing'); }
+  const prog = document.getElementById('sb-prog-'+itemId); if (prog) { prog.style.display = 'none'; const fill = document.getElementById('sb-fill-'+itemId); if (fill) fill.style.width = '0%'; }
   if (soundboardRafId) { cancelAnimationFrame(soundboardRafId); soundboardRafId = null; } soundboardAudioEl = null;
 }
 
@@ -146,7 +155,8 @@ function injectSoundboardTokens(html) {
   if (!html || !html.includes('{{sound:')) return html || '';
   return html.replace(/\{\{sound:([a-zA-Z0-9-]+)\}\}/g, (match, id) => {
     const item = dbSoundboard.find(s => s.id === id); if (!item) return '';
-    return `<button class="soundboard-inline-play" id="sb-play-${item.id}" onclick="playSoundboardAudio('${item.id}')" ${!item.audio_url ? 'disabled' : ''}>▶ ${esc(item.text)}</button>`;
+    const dis = !item.audio_url ? 'disabled' : '';
+    return `<span class="sb-token" id="sb-token-${item.id}"><button class="soundboard-inline-play" id="sb-play-${item.id}" onclick="playSoundboardAudio('${item.id}')" ${dis}>▶ ${esc(item.text)}</button><span class="sb-progress" id="sb-prog-${item.id}" style="display:none"><span class="sb-bar-wrap" onclick="sbSeek(event,this,'${item.id}')"><span class="sb-bar-fill" id="sb-fill-${item.id}"></span></span><span class="sb-mini-time" id="sb-time-${item.id}">0:00</span><button class="sb-loop-btn" onclick="toggleSbLoop('${item.id}')" title="Loop">↺</button></span></span>`;
   });
 }
 
