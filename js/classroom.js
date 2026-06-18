@@ -65,10 +65,56 @@ function hideAllViews() { ['view-welcome','view-video','view-text','view-exercis
    SOUNDBOARD — embedded per-subfolder word/phrase practice
 ══════════════════════════════════════════ */
 let soundboardAudioEl = null;
+let soundboardRafId = null;
+let soundboardLoopEnabled = false;
 
-/* ══════════════════════════════════════════
-   PLAYBACK SPEED — applies to soundboard + lesson audio
-══════════════════════════════════════════ */
+function fmtSbTime(s) { const m = Math.floor(s/60); return `${m}:${String(Math.floor(s%60)).padStart(2,'0')}`; }
+
+function playSoundboardAudio(itemId) {
+  const item = dbSoundboard.find(s => s.id === itemId); if (!item || !item.audio_url) return;
+  if (soundboardAudioEl && soundboardAudioEl._itemId === itemId) {
+    if (!soundboardAudioEl.paused) { soundboardAudioEl.pause(); const lbl = document.querySelector('#sb-play-'+itemId+' .sb-mini-label'); if (lbl) lbl.textContent = '▶ '+item.text; return; }
+    else { soundboardAudioEl.play(); const lbl = document.querySelector('#sb-play-'+itemId+' .sb-mini-label'); if (lbl) lbl.textContent = '⏸ '+item.text; soundboardRafId = requestAnimationFrame(() => sbTick(itemId)); return; }
+  }
+  stopSoundboardAudio();
+  soundboardAudioEl = new Audio(item.audio_url); soundboardAudioEl._itemId = itemId; soundboardAudioEl.playbackRate = playbackRate; soundboardAudioEl.loop = soundboardLoopEnabled;
+  const btn = document.getElementById('sb-play-'+itemId);
+  if (btn) {
+    btn.innerHTML = `<span class="sb-mini-label">⏸ ${esc(item.text)}</span><span class="sb-mini-bar-wrap" onclick="event.stopPropagation();sbSeek(event,this,'${itemId}')"><span class="sb-mini-bar-fill" id="sb-fill-${itemId}"></span></span><span class="sb-mini-time" id="sb-time-${itemId}">0:00</span><button class="sb-loop-btn${soundboardLoopEnabled?' active':''}" onclick="event.stopPropagation();toggleSbLoop('${itemId}')" title="Loop">↺</button>`;
+    btn.classList.add('playing');
+  }
+  soundboardAudioEl.play().catch(()=>{});
+  soundboardAudioEl.onended = () => { if (!soundboardLoopEnabled) resetSbBtn(itemId, item.text); };
+  soundboardRafId = requestAnimationFrame(() => sbTick(itemId));
+}
+
+function sbTick(itemId) {
+  if (!soundboardAudioEl || soundboardAudioEl._itemId !== itemId) return;
+  const fill = document.getElementById('sb-fill-'+itemId); const time = document.getElementById('sb-time-'+itemId);
+  if (fill && soundboardAudioEl.duration) fill.style.width = (soundboardAudioEl.currentTime / soundboardAudioEl.duration * 100) + '%';
+  if (time) time.textContent = fmtSbTime(soundboardAudioEl.currentTime);
+  if (!soundboardAudioEl.paused) soundboardRafId = requestAnimationFrame(() => sbTick(itemId));
+}
+
+function sbSeek(event, barEl, itemId) {
+  if (!soundboardAudioEl || soundboardAudioEl._itemId !== itemId || !soundboardAudioEl.duration) return;
+  const rect = barEl.getBoundingClientRect(); soundboardAudioEl.currentTime = ((event.clientX - rect.left) / rect.width) * soundboardAudioEl.duration;
+}
+
+function toggleSbLoop(itemId) {
+  soundboardLoopEnabled = !soundboardLoopEnabled; if (soundboardAudioEl) soundboardAudioEl.loop = soundboardLoopEnabled;
+  const loopBtn = document.querySelector('#sb-play-'+itemId+' .sb-loop-btn'); if (loopBtn) loopBtn.classList.toggle('active', soundboardLoopEnabled);
+}
+
+function resetSbBtn(itemId, text) {
+  const btn = document.getElementById('sb-play-'+itemId); if (btn) { btn.innerHTML = `▶ ${esc(text)}`; btn.classList.remove('playing'); }
+  if (soundboardRafId) { cancelAnimationFrame(soundboardRafId); soundboardRafId = null; } soundboardAudioEl = null;
+}
+
+function stopSoundboardAudio() {
+  if (soundboardAudioEl) { const prevId = soundboardAudioEl._itemId; const prevItem = dbSoundboard.find(s => s.id === prevId); soundboardAudioEl.pause(); resetSbBtn(prevId, prevItem?.text || ''); }
+  if (soundboardRafId) { cancelAnimationFrame(soundboardRafId); soundboardRafId = null; }
+}
 const PLAYBACK_RATES = [1, 0.75, 1.25];
 function cyclePlaybackRate() {
   const idx = PLAYBACK_RATES.indexOf(playbackRate);
@@ -83,6 +129,9 @@ function updateSpeedToggleLabel() {
   btn.textContent = `⚡ ${playbackRate}x`; btn.classList.toggle('active', playbackRate !== 1);
 }
 
+/* ══════════════════════════════════════════
+   PLAYBACK SPEED — applies to soundboard + lesson audio
+══════════════════════════════════════════ */
 function injectTableTokens(html) {
   if (!html || !html.includes('{{table:')) return html || '';
   // Tables are stored inline in text_content as actual HTML after the token is resolved
