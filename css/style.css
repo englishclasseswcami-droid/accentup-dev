@@ -215,18 +215,10 @@ nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.
 
 /* Soundboard */
 .soundboard-panel{margin:1.25rem 0;background:var(--surface);border:1px solid var(--skool-border);border-radius:var(--radius);padding:1.25rem}
-.soundboard-inline-play{display:inline-flex;align-items:center;gap:5px;background:var(--brand-light);color:var(--brand-dark);border:1px solid var(--brand);border-radius:20px;padding:4px 13px;font-size:13px;font-weight:700;cursor:pointer;vertical-align:middle;transition:background .15s,color .15s;margin:2px 2px}
+.soundboard-inline-play{display:inline-flex;align-items:center;gap:5px;background:var(--brand-light);color:var(--brand-dark);border:1px solid var(--brand);border-radius:20px;padding:4px 13px;font-size:13px;font-weight:700;cursor:pointer;vertical-align:middle;transition:background .15s,color .15s;margin:2px 4px}
 .soundboard-inline-play:hover{background:var(--brand);color:#fff}
 .soundboard-inline-play.playing{background:var(--brand);color:#fff;border-color:var(--brand)}
 .soundboard-inline-play:disabled{opacity:.35;cursor:default}
-.sb-token{display:inline-flex;align-items:center;gap:4px;vertical-align:middle;margin:2px 2px}
-.sb-progress{display:none;align-items:center;gap:6px;background:var(--brand);border:1px solid var(--brand);border-radius:20px;padding:4px 10px}
-.sb-bar-wrap{width:80px;height:6px;background:rgba(255,255,255,.35);border-radius:3px;cursor:pointer;position:relative;flex-shrink:0}
-.sb-bar-wrap:hover{background:rgba(255,255,255,.55)}
-.sb-bar-fill{position:absolute;left:0;top:0;height:100%;background:#fff;border-radius:3px;pointer-events:none;width:0%}
-.sb-mini-time{font-size:10px;font-weight:600;color:#fff;white-space:nowrap;min-width:26px}
-.sb-loop-btn{background:none;border:1px solid rgba(255,255,255,.45);border-radius:6px;padding:1px 6px;font-size:11px;cursor:pointer;color:rgba(255,255,255,.8);line-height:1.4}
-.sb-loop-btn:hover,.sb-loop-btn.active{background:rgba(255,255,255,.25);color:#fff;border-color:#fff}
 .soundboard-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-light);margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .soundboard-grid{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--skool-border);border-radius:var(--radius-sm);overflow:hidden}
 @media(max-width:560px){.soundboard-grid{grid-template-columns:1fr}}
