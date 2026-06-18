@@ -69,7 +69,7 @@ async function saveLesson() {
   if (isUploadingAudio) { alert('Wait for media uploads to finish.'); return; }
   const editId = document.getElementById('edit-les-id').value; const moduleId = document.getElementById('t-les-module').value; const submodId = document.getElementById('t-les-submodule').value; const type = document.getElementById('t-les-type').value; const title = document.getElementById('t-les-title').value.trim();
   if (!moduleId || !title) { alert('Fill in module and title.'); return; }
-  const btn = document.getElementById('btn-save-les'); btn.disabled = true; btn.textContent = 'Saving...';
+  const saveBtn = document.querySelector('#lesson-editor-overlay .primary-btn'); if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving...'; }
 
   // Resolve {{table:N}} tokens to actual HTML before saving
   let combinedContent = quillEditor.root.innerHTML;
@@ -85,7 +85,7 @@ async function saveLesson() {
 
   const res = editId ? await sb.from('lessons').update(payload).eq('id', editId) : await sb.from('lessons').insert([payload]);
   btn.disabled = false; btn.textContent = 'Save lesson';
-  if (res.error) { alert('Error: ' + res.error.message); return; } cancelEditLes(); await fetchData();
+  if (res.error) { alert('Error: ' + res.error.message); if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save lesson'; } return; } cancelEditLes(); await fetchData();
 }
 
 function editLesson(id) {
