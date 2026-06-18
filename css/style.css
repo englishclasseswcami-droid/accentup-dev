@@ -215,10 +215,18 @@ nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.
 
 /* Soundboard */
 .soundboard-panel{margin:1.25rem 0;background:var(--surface);border:1px solid var(--skool-border);border-radius:var(--radius);padding:1.25rem}
-.soundboard-inline-play{display:inline-flex;align-items:center;gap:5px;background:var(--brand-light);color:var(--brand-dark);border:1px solid var(--brand);border-radius:20px;padding:3px 13px;font-size:13px;font-weight:700;cursor:pointer;vertical-align:middle;transition:background .15s,color .15s,transform .1s;margin:2px 4px}
+.soundboard-inline-play{display:inline-flex;align-items:center;gap:6px;background:var(--brand-light);color:var(--brand-dark);border:1px solid var(--brand);border-radius:20px;padding:4px 13px;font-size:13px;font-weight:700;cursor:pointer;vertical-align:middle;transition:background .2s,color .2s,min-width .2s,padding .2s;margin:2px 4px;min-width:0;white-space:nowrap}
 .soundboard-inline-play:hover{background:var(--brand);color:#fff}
-.soundboard-inline-play.playing{background:var(--green,#1D9E75);color:#fff;border-color:var(--green,#1D9E75)}
+.soundboard-inline-play.playing{background:var(--brand);color:#fff;border-color:var(--brand);min-width:180px;padding:5px 12px;border-radius:14px}
 .soundboard-inline-play:disabled{opacity:.35;cursor:default}
+.sb-mini-label{flex-shrink:0;font-size:13px;font-weight:700}
+.sb-mini-bar-wrap{flex:1;height:4px;background:rgba(255,255,255,.35);border-radius:2px;cursor:pointer;min-width:50px;position:relative}
+.sb-mini-bar-wrap:hover{background:rgba(255,255,255,.5)}
+.sb-mini-bar-fill{position:absolute;left:0;top:0;height:100%;background:#fff;border-radius:2px;pointer-events:none}
+.sb-mini-time{font-size:10px;font-weight:600;opacity:.85;min-width:26px;text-align:right}
+.sb-loop-btn{background:none;border:1px solid rgba(255,255,255,.4);border-radius:6px;padding:1px 5px;font-size:11px;cursor:pointer;color:rgba(255,255,255,.75);line-height:1.4;flex-shrink:0}
+.sb-loop-btn:hover{border-color:#fff;color:#fff}
+.sb-loop-btn.active{background:rgba(255,255,255,.25);color:#fff;border-color:#fff}
 .soundboard-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--text-light);margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .soundboard-grid{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--skool-border);border-radius:var(--radius-sm);overflow:hidden}
 @media(max-width:560px){.soundboard-grid{grid-template-columns:1fr}}
