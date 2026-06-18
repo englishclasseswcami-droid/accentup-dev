@@ -40,7 +40,7 @@
     <button class="nav-tab" data-page="dashboard" id="nav-dashboard" style="display:none">Dashboard</button>
     <button class="nav-tab" data-page="classroom" id="nav-classroom" style="display:none">Classroom</button>
     <button class="nav-tab" data-page="community" id="nav-community" style="display:none">Community</button>
-    <button class="nav-tab teacher-tab" id="nav-teacher-tab" data-page="teacher" style="display:none">Teacher ✦</button>
+    <button class="nav-tab teacher-tab" id="nav-teacher-tab" data-page="classroom" style="display:none">Teacher ✦</button>
 
     <div class="nav-more-wrap">
       <button class="nav-tab nav-more-btn" id="nav-more-btn" onclick="toggleNavMore(event)">More <span class="nav-more-caret">▾</span></button>
@@ -171,7 +171,10 @@
 
 <div class="page page-full" id="page-classroom">
   <div id="classroom-grid-view">
-    <div class="section-intro"><h2>Classroom</h2><p>Select a folder to see its lessons and activities.</p></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+      <div class="section-intro" style="margin-bottom:0"><h2>Classroom</h2><p>Select a folder to see its lessons and activities.</p></div>
+      <button id="classroom-admin-btn" onclick="goToPage('teacher')" style="display:none;background:var(--surface);border:1px solid var(--skool-border);border-radius:var(--radius-sm);padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;color:var(--text-muted);gap:6px;align-items:center">⚙️ Admin</button>
+    </div>
     <div class="course-grid" id="classroom-modules-grid"><div style="color:var(--text-light);font-size:14px;grid-column:1/-1;text-align:center;padding:3rem 0">Loading...</div></div>
   </div>
   <div id="classroom-player-view" style="display:none">
@@ -332,9 +335,6 @@
           </div>
         </div>
       </div>
-    </div>
-    <div>
-      <div class="t-panel"><h3>🛠 Content manager</h3><div id="t-manage-list"><div style="color:var(--text-light);font-size:13px;padding:1rem 0;text-align:center">No content yet.</div></div></div>
     </div>
   </div>
 </div>
