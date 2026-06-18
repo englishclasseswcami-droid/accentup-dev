@@ -84,8 +84,8 @@ async function saveLesson() {
   payload.resources = resources; if (!editId) payload.order_index = dbLessons.filter(l => l.module_id === moduleId && l.submodule_id === (submodId || null)).length;
 
   const res = editId ? await sb.from('lessons').update(payload).eq('id', editId) : await sb.from('lessons').insert([payload]);
-  btn.disabled = false; btn.textContent = 'Save lesson';
-  if (res.error) { alert('Error: ' + res.error.message); if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save lesson'; } return; } cancelEditLes(); await fetchData();
+  if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save lesson'; }
+  if (res.error) { alert('Error: ' + res.error.message); return; } cancelEditLes(); await fetchData();
 }
 
 function editLesson(id) {
