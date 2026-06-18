@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function handleNavAuth() {
   if (currentUser) {
-    try { localStorage.removeItem('au_last_page'); await sb.auth.signOut(); } catch(e) { console.error('Sign out error:', e); }
+    try { await sb.auth.signOut(); } catch(e) { console.error('Sign out error:', e); }
   } else {
     goToPage('auth');
   }
@@ -157,7 +157,7 @@ function goToPage(pageId, scroll = true) {
   if (pageId === 'reference') renderReferenceLibrary();
   if (pageId === 'certificate') renderCertificate();
   if (pageId === 'profile') { const p = dbProfiles.find(x => x.id === currentUser?.id); if (p) document.getElementById('profile-username').value = p.username || ''; }
-  if (!['auth','sounds'].includes(pageId)) localStorage.setItem('au_last_page', pageId);
+  if (!['auth'].includes(pageId)) { try { history.replaceState(null,'','#'+pageId); } catch(e){} }
   if (scroll) window.scrollTo(0, 0);
 }
 
@@ -207,20 +207,16 @@ async function fetchData() {
     if (document.getElementById('page-streaks').classList.contains('active')) renderStreaks();
     if (document.getElementById('page-routine')?.classList.contains('active')) renderRoutine();
 
-    // Restore last visited page — same logic for teacher and student
-    const activePage = document.querySelector('.page.active')?.id;
-    const onLandingOrAuth = !activePage || activePage === 'page-sounds' || activePage === 'page-auth';
-    if (onLandingOrAuth) {
-      const isTeacherUser = currentUser?.email?.toLowerCase() === TEACHER_EMAIL.toLowerCase();
-      const lastPage = localStorage.getItem('au_last_page');
-      const validPages = ['dashboard','classroom','community','routine','reference','streaks','profile','sounds','certificate','teacher'];
-      const defaultPage = isTeacherUser ? 'classroom' : 'dashboard';
-      goToPage(lastPage && validPages.includes(lastPage) ? lastPage : defaultPage);
-    } else {
-      // Refresh — re-render current page with fresh data, no scroll
-      const currentPageId = activePage?.replace('page-', '');
-      if (currentPageId && currentPageId !== 'sounds' && currentPageId !== 'auth') goToPage(currentPageId, false);
-    }
+    // Restore page from URL hash — survives refresh automatically
+    const validPages = ['dashboard','classroom','community','routine','reference','streaks','profile','sounds','certificate','teacher'];
+    const isTeacherUser = currentUser?.email?.toLowerCase() === TEACHER_EMAIL.toLowerCase();
+    const defaultPage = isTeacherUser ? 'classroom' : 'dashboard';
+    const hashPage = window.location.hash.slice(1);
+    const targetPage = hashPage && validPages.includes(hashPage) ? hashPage : defaultPage;
+    // Protect student-only pages from teacher and vice versa
+    const studentOnly = ['dashboard','routine','streaks','profile','certificate'];
+    const finalPage = (isTeacherUser && studentOnly.includes(targetPage)) ? 'classroom' : targetPage;
+    goToPage(finalPage, false);
   } catch (error) { console.error("Error fetching data:", error); }
 }
 
