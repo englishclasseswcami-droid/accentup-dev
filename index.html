@@ -411,12 +411,8 @@
         <button class="secondary-btn" onclick="addQuestion('drag_drop')">+ Drag &amp; Drop (Categories)</button>
       </div>
     </div>
-    <div style="margin-top:1.25rem;background:#F0FDF4;padding:14px;border-radius:var(--radius-sm);border:1px solid #BBF7D0">
-      <p style="font-size:12px;font-weight:700;color:#166534;margin-bottom:4px">🎧 Lesson audio examples</p>
-      <p style="font-size:11px;color:var(--text-muted);margin-bottom:10px">Add clickable audios for practice words or examples.</p>
-      <div class="audio-add-row"><input type="text" id="t-audio-label" placeholder="Label (e.g. Word 1)" style="margin-bottom:0;flex:1"/><input type="file" id="t-audio-file" accept="audio/*" style="margin-bottom:0;width:auto;flex:1"/><button class="secondary-btn" id="btn-add-audio" onclick="addSharedAudio()">+ Add</button></div>
-      <div id="t-shared-audios-render"></div>
-    </div>
+    <!-- Hidden inputs kept for backward compatibility with existing lessons -->
+    <div style="display:none"><input type="text" id="t-audio-label"/><input type="file" id="t-audio-file" accept="audio/*"/><button id="btn-add-audio" onclick="addSharedAudio()"></button><div id="t-shared-audios-render"></div></div>
     <div style="margin-top:1.25rem;background:#FFF9F6;padding:14px;border-radius:var(--radius-sm);border:1px solid var(--accent)">
       <p style="font-size:12px;font-weight:700;color:var(--accent-dark);margin-bottom:4px">📎 Attach resources (PDFs, guides, images)</p>
       <input type="file" id="t-les-resources" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" multiple/>
