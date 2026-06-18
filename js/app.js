@@ -145,6 +145,8 @@ function goToPage(pageId, scroll = true) {
   const tabBtn = document.querySelector(`.nav-tab[data-page="${pageId}"]`); if (tabBtn) tabBtn.classList.add('active');
   if (tabBtn && tabBtn.closest('.nav-more-menu')) document.getElementById('nav-more-btn')?.classList.add('active');
   const pageEl = document.getElementById('page-' + pageId); if (pageEl) pageEl.classList.add('active');
+  // Hide loading overlay
+  const loader = document.getElementById('au-loading'); if (loader) { loader.style.opacity = '0'; setTimeout(() => loader.remove(), 200); }
   if (pageId === 'classroom') renderClassroomGrid();
   if (pageId === 'dashboard') renderDashboard();
   if (pageId === 'teacher') { updatePendingBadge(); renderStudentsTab(); switchTTab('routine', document.querySelector('.t-tab-btn')); }
@@ -205,19 +207,17 @@ async function fetchData() {
     if (document.getElementById('page-streaks').classList.contains('active')) renderStreaks();
     if (document.getElementById('page-routine')?.classList.contains('active')) renderRoutine();
 
-    // Restore last visited page, or go to Dashboard/Teacher by default
+    // Restore last visited page — same logic for teacher and student
     const activePage = document.querySelector('.page.active')?.id;
     const onLandingOrAuth = !activePage || activePage === 'page-sounds' || activePage === 'page-auth';
     if (onLandingOrAuth) {
       const isTeacherUser = currentUser?.email?.toLowerCase() === TEACHER_EMAIL.toLowerCase();
-      if (isTeacherUser) { goToPage('classroom'); }
-      else {
-        const lastPage = localStorage.getItem('au_last_page');
-        const validPages = ['dashboard','classroom','community','routine','reference','streaks','profile','sounds','certificate'];
-        goToPage(lastPage && validPages.includes(lastPage) ? lastPage : 'dashboard');
-      }
+      const lastPage = localStorage.getItem('au_last_page');
+      const validPages = ['dashboard','classroom','community','routine','reference','streaks','profile','sounds','certificate','teacher'];
+      const defaultPage = isTeacherUser ? 'classroom' : 'dashboard';
+      goToPage(lastPage && validPages.includes(lastPage) ? lastPage : defaultPage);
     } else {
-      // Already on a page (e.g. refresh) — re-render it with fresh data
+      // Refresh — re-render current page with fresh data, no scroll
       const currentPageId = activePage?.replace('page-', '');
       if (currentPageId && currentPageId !== 'sounds' && currentPageId !== 'auth') goToPage(currentPageId, false);
     }
@@ -233,4 +233,3 @@ async function saveProfile() {
   await sb.from('user_profiles').upsert({ id: currentUser.id, username, avatar_url: avatarUrl }); await fetchData();
   btn.disabled = false; btn.textContent = 'Save profile'; alert('Profile updated!');
 }
-
