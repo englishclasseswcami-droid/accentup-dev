@@ -68,60 +68,74 @@ let soundboardAudioEl = null;
 let soundboardRafId = null;
 let soundboardLoopEnabled = false;
 
-function fmtSbTime(s) { const m = Math.floor(s/60); return `${m}:${String(Math.floor(s%60)).padStart(2,'0')}`; }
+function fmtSbTime(s) { if (!s || isNaN(s)) return '0:00'; const m = Math.floor(s/60); return `${m}:${String(Math.floor(s%60)).padStart(2,'0')}`; }
 
 function playSoundboardAudio(itemId) {
   const item = dbSoundboard.find(s => s.id === itemId); if (!item || !item.audio_url) return;
   // Toggle pause/resume on same item
   if (soundboardAudioEl && soundboardAudioEl._itemId === itemId) {
-    if (!soundboardAudioEl.paused) {
-      soundboardAudioEl.pause();
-      const btn = document.getElementById('sb-play-'+itemId); if (btn) btn.textContent = '▶ '+item.text;
-    } else {
-      soundboardAudioEl.play();
-      const btn = document.getElementById('sb-play-'+itemId); if (btn) btn.textContent = '⏸ '+item.text;
-      soundboardRafId = requestAnimationFrame(() => sbTick(itemId));
-    }
+    if (!soundboardAudioEl.paused) { soundboardAudioEl.pause(); sbMiniSetState(false); }
+    else { soundboardAudioEl.play(); sbMiniSetState(true); sbRafStart(); }
     return;
   }
   stopSoundboardAudio();
   soundboardAudioEl = new Audio(item.audio_url); soundboardAudioEl._itemId = itemId;
   soundboardAudioEl.playbackRate = playbackRate; soundboardAudioEl.loop = soundboardLoopEnabled;
-  const btn = document.getElementById('sb-play-'+itemId); if (btn) { btn.textContent = '⏸ '+item.text; btn.classList.add('playing'); }
-  const prog = document.getElementById('sb-prog-'+itemId); if (prog) prog.style.display = 'inline-flex';
-  const loopBtn = document.querySelector('#sb-prog-'+itemId+' .sb-loop-btn'); if (loopBtn) loopBtn.classList.toggle('active', soundboardLoopEnabled);
+  // Show mini player
+  const mp = document.getElementById('sb-mini-player'); if (mp) mp.style.display = 'flex';
+  const title = document.getElementById('sb-mp-title'); if (title) title.textContent = item.text + (item.ipa ? ' '+item.ipa : '');
+  const fill = document.getElementById('sb-mp-fill'); if (fill) fill.style.width = '0%';
+  sbMiniSetState(true);
   soundboardAudioEl.play().catch(()=>{});
-  soundboardAudioEl.onended = () => { if (!soundboardLoopEnabled) resetSbBtn(itemId, item.text); };
-  soundboardRafId = requestAnimationFrame(() => sbTick(itemId));
+  soundboardAudioEl.onended = () => { if (!soundboardLoopEnabled) { sbMiniSetState(false); if (soundboardRafId) cancelAnimationFrame(soundboardRafId); } };
+  sbRafStart();
 }
 
-function sbTick(itemId) {
-  if (!soundboardAudioEl || soundboardAudioEl._itemId !== itemId) return;
-  const fill = document.getElementById('sb-fill-'+itemId); const time = document.getElementById('sb-time-'+itemId);
-  if (fill && soundboardAudioEl.duration) fill.style.width = (soundboardAudioEl.currentTime / soundboardAudioEl.duration * 100) + '%';
-  if (time) time.textContent = fmtSbTime(soundboardAudioEl.currentTime);
-  if (!soundboardAudioEl.paused) soundboardRafId = requestAnimationFrame(() => sbTick(itemId));
+function sbRafStart() {
+  if (soundboardRafId) cancelAnimationFrame(soundboardRafId);
+  function tick() {
+    if (!soundboardAudioEl) return;
+    const fill = document.getElementById('sb-mp-fill'); const time = document.getElementById('sb-mp-time');
+    const dur = soundboardAudioEl.duration || 0; const cur = soundboardAudioEl.currentTime || 0;
+    if (fill) fill.style.width = dur ? (cur/dur*100)+'%' : '0%';
+    if (time) time.textContent = fmtSbTime(cur) + ' / ' + fmtSbTime(dur);
+    if (!soundboardAudioEl.paused) soundboardRafId = requestAnimationFrame(tick);
+  }
+  soundboardRafId = requestAnimationFrame(tick);
 }
 
-function sbSeek(event, barEl, itemId) {
-  if (!soundboardAudioEl || soundboardAudioEl._itemId !== itemId || !soundboardAudioEl.duration) return;
+function sbMiniSetState(playing) {
+  const btn = document.getElementById('sb-mp-btn'); if (btn) btn.textContent = playing ? '⏸' : '▶';
+  // Update inline play buttons
+  document.querySelectorAll('.soundboard-inline-play.playing').forEach(b => b.classList.remove('playing'));
+  if (playing && soundboardAudioEl) { const b = document.getElementById('sb-play-'+soundboardAudioEl._itemId); if (b) b.classList.add('playing'); }
+}
+
+function sbMiniToggle() {
+  if (!soundboardAudioEl) return;
+  if (!soundboardAudioEl.paused) { soundboardAudioEl.pause(); sbMiniSetState(false); }
+  else { soundboardAudioEl.play(); sbMiniSetState(true); sbRafStart(); }
+}
+
+function sbMiniSeek(event, barEl) {
+  if (!soundboardAudioEl || !soundboardAudioEl.duration) return;
   const rect = barEl.getBoundingClientRect();
   soundboardAudioEl.currentTime = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)) * soundboardAudioEl.duration;
 }
 
-function toggleSbLoop(itemId) {
-  soundboardLoopEnabled = !soundboardLoopEnabled; if (soundboardAudioEl) soundboardAudioEl.loop = soundboardLoopEnabled;
-  const loopBtn = document.querySelector('#sb-prog-'+itemId+' .sb-loop-btn'); if (loopBtn) loopBtn.classList.toggle('active', soundboardLoopEnabled);
+function sbMiniToggleLoop() {
+  soundboardLoopEnabled = !soundboardLoopEnabled;
+  if (soundboardAudioEl) soundboardAudioEl.loop = soundboardLoopEnabled;
+  const btn = document.getElementById('sb-mp-loop'); if (btn) { btn.style.background = soundboardLoopEnabled ? 'rgba(255,255,255,.25)' : 'none'; btn.style.color = soundboardLoopEnabled ? '#fff' : 'rgba(255,255,255,.7)'; }
 }
 
-function resetSbBtn(itemId, text) {
-  const btn = document.getElementById('sb-play-'+itemId); if (btn) { btn.textContent = '▶ '+text; btn.classList.remove('playing'); }
-  const prog = document.getElementById('sb-prog-'+itemId); if (prog) { prog.style.display = 'none'; const fill = document.getElementById('sb-fill-'+itemId); if (fill) fill.style.width = '0%'; }
-  if (soundboardRafId) { cancelAnimationFrame(soundboardRafId); soundboardRafId = null; } soundboardAudioEl = null;
+function sbMiniClose() {
+  stopSoundboardAudio();
+  const mp = document.getElementById('sb-mini-player'); if (mp) mp.style.display = 'none';
 }
 
 function stopSoundboardAudio() {
-  if (soundboardAudioEl) { const prevId = soundboardAudioEl._itemId; const prevItem = dbSoundboard.find(s => s.id === prevId); soundboardAudioEl.pause(); resetSbBtn(prevId, prevItem?.text || ''); }
+  if (soundboardAudioEl) { soundboardAudioEl.pause(); sbMiniSetState(false); soundboardAudioEl = null; }
   if (soundboardRafId) { cancelAnimationFrame(soundboardRafId); soundboardRafId = null; }
 }
 const PLAYBACK_RATES = [1, 0.75, 1.25];
@@ -155,8 +169,7 @@ function injectSoundboardTokens(html) {
   if (!html || !html.includes('{{sound:')) return html || '';
   return html.replace(/\{\{sound:([a-zA-Z0-9-]+)\}\}/g, (match, id) => {
     const item = dbSoundboard.find(s => s.id === id); if (!item) return '';
-    const dis = !item.audio_url ? 'disabled' : '';
-    return `<span class="sb-token" id="sb-token-${item.id}"><button class="soundboard-inline-play" id="sb-play-${item.id}" onclick="playSoundboardAudio('${item.id}')" ${dis}>▶ ${esc(item.text)}</button><span class="sb-progress" id="sb-prog-${item.id}" style="display:none"><span class="sb-bar-wrap" onclick="sbSeek(event,this,'${item.id}')"><span class="sb-bar-fill" id="sb-fill-${item.id}"></span></span><span class="sb-mini-time" id="sb-time-${item.id}">0:00</span><button class="sb-loop-btn" onclick="toggleSbLoop('${item.id}')" title="Loop">↺</button></span></span>`;
+    return `<button class="soundboard-inline-play" id="sb-play-${item.id}" onclick="playSoundboardAudio('${item.id}')" ${!item.audio_url ? 'disabled' : ''}>▶ ${esc(item.text)}</button>`;
   });
 }
 
