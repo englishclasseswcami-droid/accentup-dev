@@ -145,7 +145,7 @@ function goToPage(pageId, scroll = true) {
   const pageEl = document.getElementById('page-' + pageId); if (pageEl) pageEl.classList.add('active');
   if (pageId === 'classroom') renderClassroomGrid();
   if (pageId === 'dashboard') renderDashboard();
-  if (pageId === 'teacher') { renderManageList(); updatePendingBadge(); goToPage('classroom'); return; }
+  if (pageId === 'teacher') { updatePendingBadge(); renderStudentsTab(); }
   if (pageId === 'streaks') renderStreaks();
   if (pageId === 'sounds') buildAllSoundsGrids();
   if (pageId === 'community') loadPosts();
