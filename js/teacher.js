@@ -192,12 +192,7 @@ function cancelTableBuilder() {
   tableData = { rows: 3, cols: 3, cells: [] };
 }
 
-function injectTableTokens(html) {
-  if (!html || !html.includes('{{table:')) return html || '';
-  return html.replace(/\{\{table:(\d+)\}\}/g, (match, num) => {
-    return lessonTables[`table:${num}`] || '';
-  });
-}
+
 
 
 /* ── SHARED AUDIOS ── */
