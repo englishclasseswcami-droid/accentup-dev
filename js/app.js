@@ -209,6 +209,14 @@ async function fetchData() {
     dbSoundboard = rSound?.data || [];
 
     renderClassroomGrid(); updateModuleSelect(); if (isTeacher) renderManageList();
+    // Keep the open module's sidebar (and current lesson) in sync after any edit
+    if (activeModuleId && document.getElementById('classroom-player-view')?.style.display !== 'none') {
+      renderSidebar(activeModuleId);
+      if (currentLesson) {
+        const freshLesson = dbLessons.find(l => l.id === currentLesson.id);
+        if (freshLesson) showLesson(freshLesson.id);
+      }
+    }
 
     const [rProfiles, rRec] = await Promise.all([
       sb.from('user_profiles').select('*'),
@@ -255,4 +263,3 @@ async function saveProfile() {
   await sb.from('user_profiles').upsert({ id: currentUser.id, username, avatar_url: avatarUrl }); await fetchData();
   btn.disabled = false; btn.textContent = 'Save profile'; alert('Profile updated!');
 }
-
